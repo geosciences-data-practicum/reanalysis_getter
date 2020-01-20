@@ -14,7 +14,7 @@ from src.utils import day_hours
 def build_request_dics(start_date,
                        end_date,
                        variables_of_interest,
-                       day_frequency = 'hourly',
+                       subday_frequency = 'hourly',
                        pressure_levels = 'sfc'):
     '''
     Build requests dictionaries for each combination of date/product/level
@@ -27,10 +27,10 @@ def build_request_dics(start_date,
 
     time_param = f'{start_date.strftime("%Y-%m-%d")}/to/{end_date.strftime("%Y-%m-%d")}'
 
-    if day_frequency == 'hourly':
+    if subday_frequency == 'hourly':
         time = '/'.join(day_hours())
     else:
-        time = f'00/to/23/by/{day_frequency}'
+        time = f'00/to/23/by/{subday_frequency}'
 
     if not isinstance(pressure_levels, list):
         pressure_levels = [pressure_levels]
@@ -105,9 +105,9 @@ def request_wrapper(file_name,
         Warning(f'file_name has no GRIB extension. By default, all files are GRIB')
 
     if file_name is None:
-        file_name =  f'reanalysis_era5_request_{kwargs["variables_of_interest"]}_{kwargs["start_date"]}.grib'
+        file_name = f'reanalysis_era5_request_{"-".join(kwargs["variables_of_interest"])}_{kwargs["start_date"]}.grib'
 
-    if os.path.exists('cdsapi_requested_files'):
+    if not os.path.exists('cdsapi_requested_files'):
         os.mkdir('cdsapi_requested_files')
 
     grib_file_path = os.path.join('cdsapi_requested_files', file_name)
