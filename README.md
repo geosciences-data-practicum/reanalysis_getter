@@ -37,7 +37,7 @@ the download process will start. By default, data will be stored in the
 
  - [x] Run with the CDS API.
  - [ ] Integrate with `xarray` and `iris` to extract data to n-arrays. 
- - [ ] 
+ - [ ] Integrate to Luigi/Airflow (?) pipeline 
 
 [1]: https://cds.climate.copernicus.eu/cdsapp#!/home
 [2]: https://cds.climate.copernicus.eu/api-how-to
