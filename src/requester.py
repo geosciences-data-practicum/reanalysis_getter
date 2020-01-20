@@ -28,7 +28,7 @@ def build_request_dics(start_date,
     time_param = f'{start_date.strftime("%Y-%m-%d")}/to/{end_date.strftime("%Y-%m-%d")}'
 
     if day_frequency == 'hourly':
-        time = day_hours()
+        time = '/'.join(day_hours())
     else:
         time = f'00/to/23/by/{day_frequency}'
 
@@ -69,7 +69,7 @@ def build_request_dics(start_date,
             'levtype': 'sfc',
             'param': variable_param,
             'stream': 'oper',
-            'time': '/'.join(time),
+            'time': time,
             'type': 'an'
         }
     else: 
@@ -80,7 +80,7 @@ def build_request_dics(start_date,
             'levtype': pressure_param,
             'param': variable_param,
             'stream': 'oper',
-            'time': '/'.join(time),
+            'time': time,
             'type': 'an'
         }
 
