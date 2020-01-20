@@ -10,8 +10,8 @@ import cdsapi
 
 from src.utils import datetime_range
 
-def build_request_dics(start_timestamp,
-                       end_timestamp,
+def build_request_dics(start_date,
+                       end_date,
                        presure_levels,
                        variables_of_interest
                       ):
@@ -23,6 +23,35 @@ def build_request_dics(start_timestamp,
     the cdsapi requester. For now the function will download all 24-hr data if
     available
     '''
+
+    time_param = f'{start_date.strftime("%Y-%m-%d")}/to/{end_date.strftime("%Y-%m-%d")}'
+    time = day_hours
+
+    if presure_levels = 'sfc':
+        dict_request = {
+            'class': 'ea',
+            'date': time_param
+            'expver': '1',
+            'levtype': 'sfc',
+            'param': '/'.join(variables_of_interest)
+            'stream': 'oper',
+            'time': '/'.join(time)
+            'type': 'an'
+        }
+    else: 
+        dict_request = {
+            'class': 'ea',
+            'date': time_param
+            'expver': '1',
+            'levtype': '/'.join(presure_levels),
+            'param': '/'.join(variables_of_interest)
+            'stream': 'oper',
+            'time': '/'.join(time)
+            'type': 'an'
+        }
+
+
+
 
 
 
