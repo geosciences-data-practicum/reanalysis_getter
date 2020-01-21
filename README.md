@@ -5,7 +5,12 @@ in a _bare bones_ stage, but it is able to translate multiple requests to the
 CDS API and retrieve the desired data, either waiting in the CDS user queue, or
 downloading the data directly (after waiting for the data to be processed). 
 
-## Configuration
+## Configuration and How-to Install
+
+A `environment.yml` file is added to the repo to generate the development
+environment. You can install [Miniconda][3] and run `conda env create -f
+environment.yml`. After that, you can activate the environment and start using
+the `conda activate reanalysis_env`. 
 
 Following the API configuration, a `~/.cdsapirc` file with API credentials must
 be created before doing any request. See the API [documentation][2] for more
@@ -36,8 +41,11 @@ the download process will start. By default, data will be stored in the
 ## TODO
 
  - [x] Run with the CDS API.
+ - [ ] Add SQLite for storing requested data (API has no way to check data from
+   Python]
  - [ ] Integrate with `xarray` and `iris` to extract data to n-arrays. 
  - [ ] Integrate to Luigi/Airflow (?) pipeline 
 
 [1]: https://cds.climate.copernicus.eu/cdsapp#!/home
 [2]: https://cds.climate.copernicus.eu/api-how-to
+[3]: https://docs.conda.io/en/latest/miniconda.html
