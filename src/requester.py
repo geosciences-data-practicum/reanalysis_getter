@@ -119,7 +119,7 @@ def request_wrapper(file_name,
         dict_params = build_request_dics(start_date = kwargs['start_date'],
                                          end_date = kwargs['end_date'],
                                          variables_of_interest = kwargs['variables_of_interest'],
-                                         day_frequency = kwargs['day_frequency'],
+                                         subday_frequency = kwargs['subday_frequency'], #changed by amanda from day freq to subday freq
                                          pressure_levels = kwargs ['pressure_levels']
                                         )
 
