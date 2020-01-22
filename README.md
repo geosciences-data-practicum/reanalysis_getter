@@ -7,14 +7,32 @@ downloading the data directly (after waiting for the data to be processed).
 
 ## Configuration and How-to Install
 
+### Conda (not totally working :confused:) 
+
+<p align="center"> 
+We use conda to have an easy install of all GRIB-compatible libraries. If you
+are downloading data only, you only need a few libraries. Right now, the status
+of this environment is not stable. 
+</p>
+
 A `environment.yml` file is added to the repo to generate the development
 environment. You can install [Miniconda][3] and run `conda env create -f
 environment.yml`. After that, you can activate the environment and start using
 the `conda activate reanalysis_env`. 
 
+### PyPI (with some additional binaries)
+
+You can install the required libraries using pip: `pip install -r
+requirements.txt`. This alternative is  OS-agnostic, but you have to install
+some binaries to make some libraries work (I'm talking about you [cfgib][4]).
+You can follow the instructions [here][4]. Also, be aware that [Iris][5] has to
+be manually installed. 
+
+### API Credentials
+
 Following the API configuration, a `~/.cdsapirc` file with API credentials must
 be created before doing any request. See the API [documentation][2] for more
-details on how to get your user credentials. 
+details on how to get your user credentials.
 
 # Use case
 
@@ -49,3 +67,5 @@ the download process will start. By default, data will be stored in the
 [1]: https://cds.climate.copernicus.eu/cdsapp#!/home
 [2]: https://cds.climate.copernicus.eu/api-how-to
 [3]: https://docs.conda.io/en/latest/miniconda.html
+[4]: https://github.com/ecmwf/cfgrib
+[5]: https://scitools.org.uk/iris/docs/latest/
