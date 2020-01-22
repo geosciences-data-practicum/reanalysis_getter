@@ -105,15 +105,15 @@ def request_wrapper(file_name,
         Warning(f'file_name has no GRIB extension. By default, all files are GRIB')
 
     if file_name is None:
-        variables_str = [str(var) for var in variables_of_interest]
-        file_name = f'reanalysis_era5_request_{"-".join(kwargs["variables_str"])}_{kwargs["start_date"]}.grib'
+        variables_str = [str(var) for var in kwargs["variables_of_interest"]]
+        file_name = f'reanalysis_era5_request_{"-".join(variables_str)}_{kwargs["start_date"]}.grib'
 
     if not os.path.exists('cdsapi_requested_files'):
         os.mkdir('cdsapi_requested_files')
 
     grib_file_path = os.path.join('cdsapi_requested_files', file_name)
 
-    if not os.path.exist(grib_file_path):
+    if not os.path.exists(grib_file_path):
         c = cdsapi.Client()
 
         dict_params = build_request_dics(start_date = kwargs['start_date'],
@@ -128,7 +128,7 @@ def request_wrapper(file_name,
         else:
             c.retrieve('reanalysis-era5-complete', dict_params)
 
-    else:
-        
+#    else: #commented by amanda because its wrong
+        # alternatively, could re-add: c.retrieve('reanalysis-era5-complete', dict_params        
 
 
