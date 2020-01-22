@@ -16,6 +16,7 @@ dependencies:
   - certifi=2019.11.28=py38_0
   - cf-units=2.1.3=py38h3b54f70_0
   - cffi=1.13.2=py38h33e799b_0
+  - cfgrib=0.9.7.6=py_0
   - cftime=1.0.4.2=py38h3b54f70_0
   - chardet=3.0.4=py38_1003
   - click=7.0=py_0
@@ -30,6 +31,7 @@ dependencies:
   - decorator=4.4.1=py_0
   - defusedxml=0.6.0=py_0
   - distributed=2.9.3=py_0
+  - eccodes=2.14.1=ha74ff94_4
   - entrypoints=0.3=py38_1000
   - expat=2.2.5=h4a8c4bd_1004
   - freetype=2.10.0=h24853df_1
@@ -48,6 +50,8 @@ dependencies:
   - ipython_genutils=0.2.0=py_1
   - ipywidgets=7.5.1=py_0
   - iris=2.3.0=py38_0
+  - iris-grib=0.15.0=py38_0
+  - jasper=1.900.1=h636a363_1006
   - jedi=0.15.2=py38_0
   - jinja2=2.10.3=py_0
   - jpeg=9c=h1de35cc_1001
@@ -58,6 +62,7 @@ dependencies:
   - jupyter_core=4.6.1=py38_0
   - kiwisolver=1.1.0=py38ha1b3eb9_0
   - krb5=1.16.4=hddcf347_0
+  - libaec=1.0.4=h0a44026_0
   - libblas=3.8.0=14_openblas
   - libcblas=3.8.0=14_openblas
   - libclang=8.0.1=h770b8ee_1
@@ -70,7 +75,7 @@ dependencies:
   - libiconv=1.15=h01d97ff_1005
   - liblapack=3.8.0=14_openblas
   - libllvm8=8.0.1=h770b8ee_0
-  - libnetcdf=4.7.3=nompi_hec86efb_100
+  - libnetcdf=4.7.1=nompi_hec86efb_102
   - libopenblas=0.3.7=h3d69b6c_7
   - libpng=1.6.37=h2573ce8_0
   - libsodium=1.0.17=h01d97ff_0
@@ -87,7 +92,7 @@ dependencies:
   - nbconvert=5.6.1=py38_0
   - nbformat=5.0.3=py_0
   - ncurses=6.1=h0a44026_1
-  - netcdf4=1.5.3=nompi_py38hcf2264a_102
+  - netcdf4=1.5.3=nompi_py38hd261794_101
   - notebook=6.0.2=py38_0
   - nspr=4.20=h0a44026_1000
   - nss=3.47=hcec2283_0
@@ -125,6 +130,7 @@ dependencies:
   - pysocks=1.7.1=py38_0
   - python=3.8.1=h359304d_1
   - python-dateutil=2.8.1=py_0
+  - python-eccodes=0.9.3=py38h3b54f70_1
   - pytz=2019.3=py_0
   - pyyaml=5.3=py38h0b31af3_0
   - pyzmq=18.1.1=py38h4bf09a9_0
