@@ -9,9 +9,11 @@ downloading the data directly (after waiting for the data to be processed).
 
 ### Conda (not totally working :confused:) 
 
-<p style='text-align: center;'> We use conda to have an easy install of all
-GRIB-compatible libraries. If you are downloading data only, you only need a few
-libraries. Right now, the status of this environment is not stable. </p>
+<p align="center;"> 
+We use conda to have an easy install of all GRIB-compatible libraries. If you
+are downloading data only, you only need a few libraries. Right now, the status
+of this environment is not stable. 
+</p>
 
 A `environment.yml` file is added to the repo to generate the development
 environment. You can install [Miniconda][3] and run `conda env create -f
