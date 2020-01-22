@@ -9,7 +9,7 @@ downloading the data directly (after waiting for the data to be processed).
 
 ### Conda (not totally working :confused:) 
 
-<p align="center;"> 
+<p align="center"> 
 We use conda to have an easy install of all GRIB-compatible libraries. If you
 are downloading data only, you only need a few libraries. Right now, the status
 of this environment is not stable. 
