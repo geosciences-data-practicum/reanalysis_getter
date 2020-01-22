@@ -113,7 +113,7 @@ def request_wrapper(file_name,
 
     grib_file_path = os.path.join('cdsapi_requested_files', file_name)
 
-    if not os.path.exist(grib_file_path):
+    if not os.path.exists(grib_file_path):
         c = cdsapi.Client()
 
         dict_params = build_request_dics(start_date = kwargs['start_date'],
