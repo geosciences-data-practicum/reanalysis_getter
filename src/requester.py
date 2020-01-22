@@ -88,7 +88,7 @@ def build_request_dics(start_date,
 
 
 def request_wrapper(file_name, 
-                    queue = False,
+                    wait_queue = True,
                     **kwargs):
     """
     Make request to ECMWF API. 
@@ -105,25 +105,30 @@ def request_wrapper(file_name,
         Warning(f'file_name has no GRIB extension. By default, all files are GRIB')
 
     if file_name is None:
-        file_name = f'reanalysis_era5_request_{"-".join(kwargs["variables_of_interest"])}_{kwargs["start_date"]}.grib'
+        variables_str = [str(var) for var in variables_of_interest]
+        file_name = f'reanalysis_era5_request_{"-".join(kwargs["variables_str"])}_{kwargs["start_date"]}.grib'
 
     if not os.path.exists('cdsapi_requested_files'):
         os.mkdir('cdsapi_requested_files')
 
     grib_file_path = os.path.join('cdsapi_requested_files', file_name)
 
-    c = cdsapi.Client()
+    if not os.path.exist(grib_file_path):
+        c = cdsapi.Client()
 
-    dict_params = build_request_dics(start_date = kwargs['start_date'],
-                                     end_date = kwargs['end_date'],
-                                     variables_of_interest = kwargs['variables_of_interest'],
-                                     day_frequency = kwargs['day_frequency'],
-                                     pressure_levels = kwargs ['pressure_levels']
-                                    )
+        dict_params = build_request_dics(start_date = kwargs['start_date'],
+                                         end_date = kwargs['end_date'],
+                                         variables_of_interest = kwargs['variables_of_interest'],
+                                         day_frequency = kwargs['day_frequency'],
+                                         pressure_levels = kwargs ['pressure_levels']
+                                        )
 
-    if queue is False:
-        c.retrieve('reanalysis-era5-complete', dict_params, grib_file_path)
+        if wait_queue:
+            c.retrieve('reanalysis-era5-complete', dict_params, grib_file_path)
+        else:
+            c.retrieve('reanalysis-era5-complete', dict_params)
+
     else:
-        c.retrieve('reanalysis-era5-complete', dict_params)
+        
 
 
