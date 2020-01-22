@@ -28,7 +28,7 @@ some binaries to make some libraries work (I'm talking about you [cfgib][4]).
 You can follow the instructions [here][4]. Also, be aware that [Iris][5] has to
 be manually installed. 
 
-## API Credentials
+### API Credentials
 
 Following the API configuration, a `~/.cdsapirc` file with API credentials must
 be created before doing any request. See the API [documentation][2] for more
