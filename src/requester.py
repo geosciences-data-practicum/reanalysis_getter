@@ -110,9 +110,9 @@ def request_wrapper(file_name,
         file_name = f'reanalysis_era5_request_{"-".join(variables_str)}_{kwargs["start_date"]}.grib'
 
     if not os.path.exists(os.path.join(path, 'cdsapi_requested_files')):
-        os.mkdir(os.path.join('path', 'cdsapi_requested_files'))
+        os.mkdir(os.path.join(path, 'cdsapi_requested_files'))
 
-    grib_file_path = os.path.join('cdsapi_requested_files', file_name)
+    grib_file_path = os.path.join(path, 'cdsapi_requested_files', file_name)
 
     if not os.path.exists(grib_file_path):
         c = cdsapi.Client()
