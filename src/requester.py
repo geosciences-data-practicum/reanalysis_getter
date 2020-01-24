@@ -87,7 +87,8 @@ def build_request_dics(start_date,
     return(dict_request)
 
 
-def request_wrapper(file_name, 
+def request_wrapper(file_name,
+                    path,
                     wait_queue = True,
                     **kwargs):
     """
@@ -108,8 +109,8 @@ def request_wrapper(file_name,
         variables_str = [str(var) for var in kwargs["variables_of_interest"]]
         file_name = f'reanalysis_era5_request_{"-".join(variables_str)}_{kwargs["start_date"]}.grib'
 
-    if not os.path.exists('cdsapi_requested_files'):
-        os.mkdir('cdsapi_requested_files')
+    if not os.path.exists(os.path.join(path, 'cdsapi_requested_files')):
+        os.mkdir(os.path.join('path', 'cdsapi_requested_files'))
 
     grib_file_path = os.path.join('cdsapi_requested_files', file_name)
 
@@ -119,7 +120,7 @@ def request_wrapper(file_name,
         dict_params = build_request_dics(start_date = kwargs['start_date'],
                                          end_date = kwargs['end_date'],
                                          variables_of_interest = kwargs['variables_of_interest'],
-                                         subday_frequency = kwargs['subday_frequency'], #changed by amanda from day freq to subday freq
+                                         subday_frequency = kwargs['subday_frequency'],
                                          pressure_levels = kwargs ['pressure_levels']
                                         )
 
