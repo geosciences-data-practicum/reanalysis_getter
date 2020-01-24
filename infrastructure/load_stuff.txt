@@ -1,0 +1,3 @@
+module load Anaconda3
+alias what_ip="/sbin/ip route get 8.8.8.8 | awk '{print $NF;exit}'"
+alias jn='jupyter notebook --no-browser --port=2500'
