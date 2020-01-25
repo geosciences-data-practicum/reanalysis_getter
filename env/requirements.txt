@@ -1,0 +1,8 @@
+numpy
+pandas
+requests
+ipython
+jupyter
+xarray
+cdsapi
+
