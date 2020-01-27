@@ -1,0 +1,5 @@
+ENV_NAME='reanalysis_env'
+DATA_FOLDER='/project2/geos39650/jet_stream'
+PORT=2500
+ROOT_FOLDER=$(pwd)
+

@@ -4,7 +4,7 @@ source .project_env
 
 # Exit the script as soon as something fails (-e) or if a variable is 
 # not defined (-u)
-set -e -u
+#set -e -u
 
 
 # Run Jupyter Notebook within RCC's fancy environment
@@ -17,39 +17,36 @@ function print-env () {
         echo "Environment name: ${ENV_NAME}"
         echo "Data folder: ${DATA_FOLDER}"
         echo "Project repo root: ${ROOT_FOLDER}"
+        echo: "Jupyter Notebook Port: ${PORT}"
 
 }
 
 
 function build-env () {
 
-    set +u
+    set +u +e
 
     module load Anaconda3
+    eval "$(command conda 'shell.bash' 'hook' 2> /dev/null)"
     ENV=$(conda env list | grep ${ENV_NAME} | wc -l)
     
     if [[ $ENV -eq 1 ]]
     then 
         echo "${ENV_NAME} is already created. I will just loaded it"
-        eval "$(conda shell.bash hook)"
-
-        set -u
-        echo "OK, load conda. Now activate ${ENV_NAME}"
-        conda activate reanalysis_env
+        conda activate ${ENV_NAME}
     else
         conda env create -f ${ROOT_FOLDER}/env/environment.yml
-        eval "$(conda shell.bash hook)"
         conda activate ${ENV_NAME}
-    fi    
+    fi
 }
 
 
 function ganymede () {
     
-    local IP="/sbin/ip route get 8.8.8.8 | head -n 1 | awk '{print $NF}'"
+    IP=$(/sbin/ip route get 8.8.8.8 | head -n 1 | awk '{print $NF}')
 
-    module load Anaconda3
-    jupyter notebook --no-browser --port=$1 --ip $IP
+    conda activate ${ENV_NAME}
+    jupyter notebook --no-browser --port=$PORT --ip $IP
 
 }
 
