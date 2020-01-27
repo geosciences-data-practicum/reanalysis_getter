@@ -6,6 +6,31 @@ source env/.project_env
 # not defined (-u)
 set -e -u
 
+# Run Jupyter Notebook within RCC's fancy environment
+
+cat << "EOF"
+______  _____  _____     ___                   _            
+| ___ \/  __ \/  __ \   |_  |                 | |           
+| |_/ /| /  \/| /  \/     | |_   _ _ __  _   _| |_ ___ _ __ 
+|    / | |    | |         | | | | | '_ \| | | | __/ _ \ '__|
+| |\ \ | \__/\| \__/\ /\__/ / |_| | |_) | |_| | ||  __/ |   
+\_| \_| \____/ \____/ \____/ \__,_| .__/ \__, |\__\___|_|   
+                                  | |     __/ |             
+                                  |_|    |___/              
+   __________             ______________
+  |:""""""""i:           | ............ :
+  |:        |:           | :          | :
+  |: >boba  |:           | :          | :
+  |:________!:           | :>@wwa.com | :
+  |   .....  :---_____---| :__________! :
+  |  '-----" :           |..............:
+  | @        :"-__-_     |"""""""""""""":
+  |..........:    _-"    |..............:
+  /.::::::::.\   /\      /.::::::::.:::.\
+ /____________\ (__)    /________________\
+EOF
+
+
 function print-env () {
         echo "###########################################"
         echo "##    Project Environment Information    ##"
@@ -13,27 +38,31 @@ function print-env () {
         echo "Environment name: ${ENV_NAME}"
         echo "Data folder: ${DATA_FOLDER}"
         echo "Project repo root: ${ROOT_FOLDER}"
-        echo: "Jupyter Notebook Port: ${PORT}"
 
 }
 
 
 function build-env () {
 
-    set +u +e
+    set +u
 
     module load Anaconda3
-    eval "$(command conda 'shell.bash' 'hook' 2> /dev/null)"
     ENV=$(conda env list | grep ${ENV_NAME} | wc -l)
     
     if [[ $ENV -eq 1 ]]
     then 
         echo "${ENV_NAME} is already created. I will just loaded it"
-        conda activate ${ENV_NAME}
+        #eval "$(conda shell.bash hook)" >> /dev/null
+
+        echo "Now activate ${ENV_NAME}"
+        CONDA_BASE=$(conda info --base)
+        source $CONDA_BASE/etc/profile.d/conda.sh
+        conda activate reanalysis_env
     else
         conda env create -f ${ROOT_FOLDER}/env/environment.yml
+        eval "$(conda shell.bash hook)"
         conda activate ${ENV_NAME}
-    fi
+    fi    
 }
 
 
@@ -41,8 +70,8 @@ function ganymede () {
     
     IP=$(/sbin/ip route get 8.8.8.8 | head -n 1 | awk '{print $NF}')
 
-    conda activate ${ENV_NAME}
-    jupyter notebook --no-browser --port=$PORT --ip $IP
+    module load Anaconda3
+    jupyter notebook --no-browser --port=$1 --ip $IP
 
 }
 
@@ -58,7 +87,7 @@ OPTIONS:
 EXAMPLES:
    Activate RCC Anaconda module and install conda env:
         $ ./load_stuff.sh -b
-   Activaate and run a Jupyter notebook in local node:
+   Activaate and run a Jupyter notebook in local note:
         $ ./load_stuff.sh -r
 EOF
 }
