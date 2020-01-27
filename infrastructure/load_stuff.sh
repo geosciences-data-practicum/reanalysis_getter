@@ -1,14 +1,10 @@
 #!/usr/bin/env bash
 
-source .project_env
+source env/.project_env
 
 # Exit the script as soon as something fails (-e) or if a variable is 
 # not defined (-u)
-#set -e -u
-
-
-# Run Jupyter Notebook within RCC's fancy environment
-
+set -e -u
 
 function print-env () {
         echo "###########################################"
@@ -62,7 +58,7 @@ OPTIONS:
 EXAMPLES:
    Activate RCC Anaconda module and install conda env:
         $ ./load_stuff.sh -b
-   Activaate and run a Jupyter notebook in local note:
+   Activaate and run a Jupyter notebook in local node:
         $ ./load_stuff.sh -r
 EOF
 }
