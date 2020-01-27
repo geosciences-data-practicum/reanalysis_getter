@@ -38,6 +38,7 @@ function print-env () {
         echo "Environment name: ${ENV_NAME}"
         echo "Data folder: ${DATA_FOLDER}"
         echo "Project repo root: ${ROOT_FOLDER}"
+        echo "Jupyter Notebook port: ${PORT}"
 
 }
 
