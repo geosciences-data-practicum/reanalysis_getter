@@ -1,7 +1,8 @@
 # Infrastructure helpers
 
 RCC Cluster has a lot of tricks! Hopefully, Amanda's experience and this bash
-files will help the user to navigate with ease by using some simple functions.
+files will help the user to navigate these with ease by using some simple
+functions.
 
 ### `load_stuff.sh`: Jupyter notebook runner and environment manager
 
