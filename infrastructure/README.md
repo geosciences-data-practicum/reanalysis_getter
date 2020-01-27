@@ -11,10 +11,29 @@ The `load_stuff.sh` command creates an environment using the library information
 start a Jupyter Notebook directly from the bash while setting the IP socket to
 your local machine. The function has a succinct help: 
 
-``` 
-$ ./load_stuff.sh -h
 
-Usage: infrastructure/load_stuff.sh (-h | -i | -b | -r |)
+```
+[you@midway2-login1 reanalysis_getter]$ ./env/load_stuff.sh -h
+______  _____  _____     ___                   _
+| ___ \/  __ \/  __ \   |_  |                 | |
+| |_/ /| /  \/| /  \/     | |_   _ _ __  _   _| |_ ___ _ __
+|    / | |    | |         | | | | | '_ \| | | | __/ _ \ '__|
+| |\ \ | \__/\| \__/\ /\__/ / |_| | |_) | |_| | ||  __/ |
+\_| \_| \____/ \____/ \____/ \__,_| .__/ \__, |\__\___|_|
+                                  | |     __/ |
+                                  |_|    |___/
+   __________             ______________
+  |:""""""""i:           | ............ :
+  |:        |:           | :          | :
+  |: >boba  |:           | :          | :
+  |:________!:           | :>@wwa.com | :
+  |   .....  :---_____---| :__________! :
+  |  '-----" :           |..............:
+  | @        :"-__-_     |"""""""""""""":
+  |..........:    _-"    |..............:
+  /.::::::::.\   /\      /.::::::::.:::.\
+ /____________\ (__)    /________________\
+Usage: ./env/load_stuff.sh (-h | -i | -b | -r |)
 OPTIONS:
    -h|--help                   Show this message
    -i|--info                   Show information about the environment
@@ -24,8 +43,8 @@ OPTIONS:
 EXAMPLES:
    Activate RCC Anaconda module and install conda env:
         $ ./load_stuff.sh -b
-   Activaate and run a Jupyter notebook in local node:
+   Activaate and run a Jupyter notebook in local note:
         $ ./load_stuff.sh -r
+
+
 ```
-
-
