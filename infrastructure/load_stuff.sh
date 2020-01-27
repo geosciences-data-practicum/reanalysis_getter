@@ -57,7 +57,7 @@ function build-env () {
         echo "Now activate ${ENV_NAME}"
         CONDA_BASE=$(conda info --base)
         source $CONDA_BASE/etc/profile.d/conda.sh
-        conda activate reanalysis_env
+        conda activate ${ENV_NAME}
     else
         conda env create -f ${ROOT_FOLDER}/env/environment.yml
         eval "$(conda shell.bash hook)"
@@ -71,7 +71,7 @@ function ganymede () {
     IP=$(/sbin/ip route get 8.8.8.8 | head -n 1 | awk '{print $NF}')
 
     module load Anaconda3
-    jupyter notebook --no-browser --port=$1 --ip $IP
+    jupyter notebook --no-browser --port=${PORT} --ip $IP
 
 }
 
