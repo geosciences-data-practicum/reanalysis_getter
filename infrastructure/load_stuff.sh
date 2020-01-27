@@ -44,23 +44,18 @@ function print-env () {
 
 function build-env () {
 
-    set +u
+    set +u +e
 
     module load Anaconda3
+    eval "$(command conda 'shell.bash' 'hook' 2> /dev/null)"
     ENV=$(conda env list | grep ${ENV_NAME} | wc -l)
     
     if [[ $ENV -eq 1 ]]
     then 
         echo "${ENV_NAME} is already created. I will just loaded it"
-        #eval "$(conda shell.bash hook)" >> /dev/null
-
-        echo "Now activate ${ENV_NAME}"
-        CONDA_BASE=$(conda info --base)
-        source $CONDA_BASE/etc/profile.d/conda.sh
-        conda activate reanalysis_env
+        conda activate ${ENV_NAME}
     else
         conda env create -f ${ROOT_FOLDER}/env/environment.yml
-        eval "$(conda shell.bash hook)"
         conda activate ${ENV_NAME}
     fi    
 }
