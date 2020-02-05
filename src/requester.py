@@ -7,15 +7,16 @@ on the cdsapi library.
 
 import os
 import cdsapi
+import logging
 from datetime import datetime
 
-from src.utils import day_hours
+from src.utils import day_hours, date_elements
 
 def build_request_dics(start_date,
                        end_date,
                        variables_of_interest,
                        subday_frequency = 'hourly',
-                       pressure_levels = 'sfc'):
+                       pressure_levels = ['sfc']):
     '''
     Build requests dictionaries for each combination of date/product/level
 
@@ -25,66 +26,42 @@ def build_request_dics(start_date,
     available
     '''
 
-    time_param = f'{start_date.strftime("%Y-%m-%d")}/to/{end_date.strftime("%Y-%m-%d")}'
+    years, months, days = date_elements(start_date = start_date,
+                                       end_date = end_date,
+                                        delta={'days': 1})
 
     if subday_frequency == 'hourly':
-        time = '/'.join(day_hours())
+        time = day_hours(1)
     else:
-        time = f'00/to/23/by/{subday_frequency}'
+        time = day_hours(subday_frequency)
 
     if not isinstance(pressure_levels, list):
         pressure_levels = [pressure_levels]
 
-        if len(pressure_levels) == 1:
-            pressure_param = str(pressure_levels[0])
-        else:
-            pressure_param = '/'.join(pressure_levels)
-
-    else:
-        if len(pressure_levels) == 1:
-            pressure_param = str(pressure_levels[0])
-        else:
-            pressure_param = '/'.join(pressure_levels)
-
-
     if not isinstance(variables_of_interest, list):
         variables_of_interest = [variables_of_interest]
 
-        if len(variables_of_interest) == 1:
-            variable_param = str(variables_of_interest[0])
-        else:
-            variable_param = '/'.join(variables_of_interest)
-
-    else:
-        if len(variables_of_interest) == 1:
-            variable_param = str(variables_of_interest[0])
-        else:
-            variable_param = '/'.join(variables_of_interest)
-
-    if pressure_levels == 'sfc':
+    if 'sfc' in pressure_levels and len(pressure_levels) == 1:
         dict_request = {
-            'class': 'ea',
-            'date': time_param,
-            'expver': '1',
-            'levtype': 'sfc',
-            'param': variable_param,
-            'stream': 'oper',
-            'time': time,
-            'type': 'an'
+            'product_type': 'reanalysis',
+            'format': 'netcdf',
+            'variable': variables_of_interest,
+            'year': years,
+            'month' months,
+            'day': days
         }
-    else: 
+    elif 'sfc' not in pressure_levels: 
         dict_request = {
-            'class': 'ea',
-            'date': time_param,
-            'expver': '1',
-            'levtype': pressure_param,
-            'param': variable_param,
-            'stream': 'oper',
-            'time': time,
-            'type': 'an'
+            'product_type': 'reanalysis',
+            'format': 'netcdf',
+            'pressure_level': pressure_levels,
+            'variable': variables_of_interest,
+            'year': years,
+            'month' months,
+            'day': days
         }
 
-    return(dict_request)
+    return dict_request
 
 
 def request_wrapper(file_name,
@@ -102,8 +79,8 @@ def request_wrapper(file_name,
     file_name. 
     """
 
-    if isinstance(file_name, str) and not '.grb' in file_name:
-        Warning(f'file_name has no GRIB extension. By default, all files are GRIB')
+    if isinstance(file_name, str) and not '.nc' in file_name:
+        Warning(f'file_name has no NetCDF extension. By default, all files are NetCDF (.nc)')
 
     if file_name is None:
         variables_str = [str(var) for var in kwargs["variables_of_interest"]]
@@ -115,8 +92,8 @@ def request_wrapper(file_name,
     grib_file_path = os.path.join(path, 'cdsapi_requested_files', file_name)
 
     if not os.path.exists(grib_file_path):
-        c = cdsapi.Client()
 
+        c = cdsapi.Client()
         dict_params = build_request_dics(start_date = kwargs['start_date'],
                                          end_date = kwargs['end_date'],
                                          variables_of_interest = kwargs['variables_of_interest'],
@@ -124,12 +101,12 @@ def request_wrapper(file_name,
                                          pressure_levels = kwargs ['pressure_levels']
                                         )
 
-        if wait_queue:
-            c.retrieve('reanalysis-era5-complete', dict_params, grib_file_path)
-        else:
-            c.retrieve('reanalysis-era5-complete', dict_params)
-
-#    else: #commented by amanda because its wrong
-        # alternatively, could re-add: c.retrieve('reanalysis-era5-complete', dict_params        
+        if 'sfc' in kwargs['pressure_levels'] and len(kwargs['pressure_levels']) == 1:
+            c.retrieve('reanalysis-era5-single-levels', dict_params, grib_file_path)
+       else:
+            c.retrieve('reanalysis-era5-pressure-levels', dict_params,
+                       grib_file_path)
+   else:
+      logger.info(f'{grib_file_path} already exists in path') 
 
 
