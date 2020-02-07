@@ -12,9 +12,12 @@ from datetime import datetime
 
 from src.utils import day_hours, date_elements
 
-def build_request_dics(start_date,
+def build_request_dict(start_date,
                        end_date,
                        variables_of_interest,
+                       months=None,
+                       years=None,
+                       days=None,
                        subday_frequency = 'hourly',
                        pressure_levels = ['sfc']):
     '''
@@ -26,9 +29,10 @@ def build_request_dics(start_date,
     available
     '''
 
-    years, months, days = date_elements(start_date = start_date,
-                                       end_date = end_date,
-                                        delta={'days': 1})
+    if start_date is not None and end_date is not  None:
+        years, months, days = date_elements(start_date = start_date,
+                                            end_date = end_date,
+                                            delta={'days': 1})
 
     if subday_frequency == 'hourly':
         time = day_hours(1)
@@ -47,8 +51,9 @@ def build_request_dics(start_date,
             'format': 'netcdf',
             'variable': variables_of_interest,
             'year': years,
-            'month' months,
-            'day': days
+            'month': months,
+            'day': days,
+            'time': time
         }
     elif 'sfc' not in pressure_levels: 
         dict_request = {
@@ -57,8 +62,9 @@ def build_request_dics(start_date,
             'pressure_level': pressure_levels,
             'variable': variables_of_interest,
             'year': years,
-            'month' months,
-            'day': days
+            'month': months,
+            'day': days,
+            'time': time
         }
 
     return dict_request
@@ -94,7 +100,7 @@ def request_wrapper(file_name,
     if not os.path.exists(grib_file_path):
 
         c = cdsapi.Client()
-        dict_params = build_request_dics(start_date = kwargs['start_date'],
+        dict_params = build_request_dict(start_date = kwargs['start_date'],
                                          end_date = kwargs['end_date'],
                                          variables_of_interest = kwargs['variables_of_interest'],
                                          subday_frequency = kwargs['subday_frequency'],
@@ -103,10 +109,7 @@ def request_wrapper(file_name,
 
         if 'sfc' in kwargs['pressure_levels'] and len(kwargs['pressure_levels']) == 1:
             c.retrieve('reanalysis-era5-single-levels', dict_params, grib_file_path)
-       else:
-            c.retrieve('reanalysis-era5-pressure-levels', dict_params,
-                       grib_file_path)
-   else:
-      logger.info(f'{grib_file_path} already exists in path') 
-
-
+        else:
+            c.retrieve('reanalysis-era5-pressure-levels', dict_params, grib_file_path)
+    else:
+        logger.info(f'{grib_file_path} already exists in path') 
