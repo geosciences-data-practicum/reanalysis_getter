@@ -45,7 +45,7 @@ def day_hours(delta=1):
 
     day_hours_list = []
     while day_start < day_end:
-        day_hours_list.append(day_start.strftime("%H:%M:%S"))
+        day_hours_list.append(day_start.strftime("%H:%M"))
         day_start += step
 
     return day_hours_list
