@@ -50,8 +50,3 @@ def day_hours(delta=1):
 
     return day_hours_list
 
-
-
-
-
-

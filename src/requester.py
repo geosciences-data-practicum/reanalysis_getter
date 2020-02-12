@@ -77,7 +77,6 @@ def request_wrapper(file_name,
     """
     Make request to ECMWF API. 
 
-
     This function is a mere wrapper of the cdsapi.retrieve method. The wrapper
     will create the API client using the credentials stored in the ~/.cdsapirc
     file (API key and URL). The function will call retrieve data either to the
@@ -89,15 +88,16 @@ def request_wrapper(file_name,
         Warning(f'file_name has no NetCDF extension. By default, all files are NetCDF (.nc)')
 
     if file_name is None:
-        variables_str = [str(var) for var in kwargs["variables_of_interest"]]
-        file_name = f'reanalysis_era5_request_{"-".join(variables_str)}_{kwargs["start_date"]}.grib'
+        variable_str = ''.join(kwargs['variables_of_interest'])
+        time_str = kwargs['start_date'].strftime("%Y%m")
+        file_name = f'reanalysis_era5_request_{variable_str}_{time_str}_{kwargs["subday_frequency"]}.nc'
 
     if not os.path.exists(os.path.join(path, 'cdsapi_requested_files')):
         os.mkdir(os.path.join(path, 'cdsapi_requested_files'))
 
-    grib_file_path = os.path.join(path, 'cdsapi_requested_files', file_name)
+    nc_file_path = os.path.join(path, 'cdsapi_requested_files', file_name)
 
-    if not os.path.exists(grib_file_path):
+    if not os.path.exists(nc_file_path):
 
         c = cdsapi.Client()
         dict_params = build_request_dict(start_date = kwargs['start_date'],
@@ -108,8 +108,8 @@ def request_wrapper(file_name,
                                         )
 
         if 'sfc' in kwargs['pressure_levels'] and len(kwargs['pressure_levels']) == 1:
-            c.retrieve('reanalysis-era5-single-levels', dict_params, grib_file_path)
+            c.retrieve('reanalysis-era5-single-levels', dict_params, nc_file_path)
         else:
-            c.retrieve('reanalysis-era5-pressure-levels', dict_params, grib_file_path)
+            c.retrieve('reanalysis-era5-pressure-levels', dict_params, nc_file_path)
     else:
-        logger.info(f'{grib_file_path} already exists in path') 
+        logger.info(f'{nc_file_path} already exists in path') 
