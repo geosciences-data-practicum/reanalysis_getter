@@ -2,8 +2,6 @@
 Basic I/O functions to load/unload xarray data from reanalysis
 """
 
-
-
 import os
 import xarray as xr
 import pandas as pd
@@ -15,7 +13,7 @@ def reader_n_cutter(path_to_file,
                    time_selection,
                    spatial_selection,
                    resample_window,
-                   csv=False,
+                   save_local=False,
                    regex=False):
     """
     Read file and process to desired location and date. 
@@ -72,7 +70,21 @@ def reader_n_cutter(path_to_file,
                         (f"Couldn''t slice on time. Check data"
                          f"formats: {e}")
                     )
-    else:
+
+
+        # Resampling using pandas resampling grammar
+        resample_filter = time_space_filter.resample(time=resample_window).mean()
+
+        if save_local == 'csv':
+            ds_df = resample_filter.to_dataframe().reset_index(drop=False)
+            filename = f'df_lat_{spatial_selection[0]}_lon_{spatial_selection[1]}_{time_aggregation}[0]'
+            ds_df.to_csv(f'{filename}.csv', index=False)
+        elif save_local == 'netcdf'
+            resample_filter.to_netcdf(f'{filename}.nc')
+        else:
+            return resample_filter
+
+
         raise ValueError(
             (f"['latitude', 'longitude','time'] are the default dims, "
              f"but the Database dims are: {ds_dims}"
