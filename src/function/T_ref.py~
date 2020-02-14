@@ -1,5 +1,5 @@
 """
-Compute effective lattitude CDF 
+Compute reference temperature CDF 
 Imputs: temperature array,latitude array, seq of temperature bin cut points
 """
 
