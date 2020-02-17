@@ -102,6 +102,7 @@ def reader_n_cutter(path_to_file,
 
         # Resampling using pandas resampling grammar
         resample_filter = nc_files_space_filter.sortby('time').resample(time=resample_window).mean()
+        resample_filter = resample_filter.dropna(dim='time')
 
         if save_local == 'csv':
             ds_df = resample_filter.to_dataframe().reset_index(drop=False)
@@ -109,7 +110,7 @@ def reader_n_cutter(path_to_file,
         elif save_local == 'netcdf':
             resample_filter.to_netcdf(f'{filename}.nc')
         else:
-            return nc_files_space_filter
+            return resample_filter
     else:
         raise ValueError(
             (f"['latitude', 'longitude','time'] are the default dims, "
