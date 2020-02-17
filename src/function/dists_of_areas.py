@@ -5,7 +5,7 @@ Imputs: temperature array, latitude array, seq of temperature bin cut points
 
 import numpy as np
 
-def dists_of_areas(temp_df,lat,Tbins,plot=False):
+def dists_of_areas(temp_df,lat,Tbins):
     #weight entry by box area so that y axis is no longer the number of boxes, but rather the area taken up by each box
     #this is the area of each grid cell
     R_earth = 6367.47 #km

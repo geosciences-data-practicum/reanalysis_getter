@@ -1,14 +1,11 @@
 """
 Calculating effective latitude based on real temperatures 
-Imputs: temperature array, latitude array, seq of temperature bin cut points
+Imputs: temperature array, latitude array, cdf of effective latitude function including binedges and cdf arrays
 """
 
 import numpy as np
-from dists_of_lat_eff import dists_of_lat_eff
 
-def true_T_to_lat_eff(temp_df,lat,Tbins):
-    #take effective latitude cdf
-    binedges,cdf_lat_effs = dists_of_lat_eff(temp_df,lat,Tbins)
+def true_T_to_lat_eff(temp_df,lat,binedges,cdf_lat_effs):
     #calculate effective latitude
     lat_eff = np.interp(temp_df,binedges,cdf_lat_effs)
     #calculate difference to real latitude
