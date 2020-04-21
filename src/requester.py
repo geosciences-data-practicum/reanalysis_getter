@@ -107,7 +107,7 @@ def request_wrapper(file_name,
                                          pressure_levels = kwargs ['pressure_levels']
                                         )
 
-        if 'sfc' in kwargs['pressure_levels'] and len(kwargs['pressure_levels']) == 1:
+        if 'sfc' in kwargs['pressure_levels']: 
             c.retrieve('reanalysis-era5-single-levels', dict_params, nc_file_path)
         else:
             c.retrieve('reanalysis-era5-pressure-levels', dict_params, nc_file_path)
