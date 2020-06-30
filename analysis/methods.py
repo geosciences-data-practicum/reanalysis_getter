@@ -58,8 +58,7 @@ def area_calculation_real_area(dd_data,
         - resample_time (bool): Resampling time to create grouped area maps.
         Default is False. Thus, it will create an area map per each time in the
         dd_data.
-        - grouping_time_interval (str): If resample_time is True, define the
-        time window for grouping. Default is one week: '1w'
+
         - temp_var (str): variable to calculate buckets. Default is 't2m'.
 
     Returns: pd.DataFrame with cumulative area maps per time.
@@ -126,8 +125,7 @@ def dists_of_lat_eff(cdf_areas):
 def temp_ref(ddf,
              area_weights,
              temp_binedges,
-             pdf_lat_effs,
-             resample_time=False):
+             cdf_lat_effs):
     """
     Latitudinal reference temperature to capture the gradient effect of the
     jet-stream (t_ref) 
@@ -148,29 +146,24 @@ def temp_ref(ddf,
 
     Returns: An ndarray with the interpolated values. 
     """
- 
-    # Avoid problems with merge
-    ddf['temp_bracket'] = ddf.temp_bracket.apply(lambda x: x.left.astype(float))
 
-    if resample_time:
-        area_weights['week_year']  = area_weights.time.dt.strftime('%Y-%W')
-        ddf['week_year']  = ddf.time.dt.strftime('%Y-%W')
-        ddf_merge = ddf.merge(area_weights,
-                              on=['week_year', 'temp_bracket'],
-                              how='left')
-    else:
-        ddf_merge = ddf.merge(area_weights,
-                              on=['time', 'temp_bracket'],
-                             how='left')
- 
+    # Filter area_weights
+    unique_time = ddf.name
+    areas_time = area_weights[area_weights['time'] == unique_time]
+
     # Interpolate to calculate the t_ref latitde mapping
-    t_ref =  np.interp(ddf_merge.latitude,
-                       np.flip(ddf_merge[pdf_lat_effs]),
-                       np.flip(ddf_merge[temp_binedges])
+    t_ref = np.interp(ddf.latitude.unique(),
+                      np.flip(areas_time[cdf_lat_effs]),
+                      np.flip(areas_time[temp_binedges])
                       )
 
+    t_ref_df = pd.DataFrame({
+        't_ref': t_ref,
+        'time': unique_time,
+        'latitude': ddf.latitude.unique()
+    })
 
-    return t_ref
+    return t_ref_df
 
 
 def t_prime_calculation(dd_data, 
@@ -212,11 +205,6 @@ def t_prime_calculation(dd_data,
         t_max, t_min = max_min
         range_cuts = np.arange(t_min, t_max, cut_interval)
 
-    # Calculate temperature brackets
-    dd_data['temp_bracket'] = dd_data[temp_var].map_partitions(
-        pd.cut, range_cuts
-    )
-
     # Calculate area weights
     area_weights = area_calculation_real_area(dd_data=dd_data,
                                               grid_lat=grid_lat,
@@ -236,25 +224,25 @@ def t_prime_calculation(dd_data,
     area_weights['eff_lat_deg'] = np.rad2deg(area_weights.cdf_eff_lat_mapping)
 
     # Merge and calculate t_ref by time partition
+    # Note: dask arrays need metadata on the returning object
+    meta = pd.DataFrame([], columns=["t_ref", 'time', 'latitude'],
+                        index=pd.Index([], name="time"), dtype=str)
     test_p = dd_data.groupby(['time']).apply(temp_ref,
                                              area_weights=area_weights,
-                                             resample_time=resample_time,
                                              temp_binedges='temp_bracket',
-                                             pdf_lat_effs='eff_lat_deg')
+                                             cdf_lat_effs='eff_lat_deg',
+                                             meta=meta
+                                             )
 
     # Assign temperature referece to main dataframe and calculate t_prime
     t_ref = test_p.compute()
-    t_ref.index = t_ref.index.astype(str)
-    values = np.array(t_ref.tolist())
-    new_index = np.repeat(t_ref.index, values.shape[1])
+    t_ref_df_noidx = t_ref.reset_index(drop=True)
+    merge_data = dd_data.merge(t_ref_df_noidx, on=['time', 'latitude'],
+                               how='left')
 
-    t_ref_df = pd.Series(values.ravel(), index=new_index)
-    t_ref_df_noidx = t_ref_df.reset_index(drop=True)
+    merge_data['t_prime'] = merge_data['t2m'] - merge_data['t_ref']
 
-    dd_data['tref'] = t_ref_df_noidx
-    dd_data['t_prime'] = dd_data['t2m'] - dd_data['tref']
-
-    return dd_data
+    return merge_data
 
 
 def dask_data_to_xarray(df,
