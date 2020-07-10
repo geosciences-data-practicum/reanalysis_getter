@@ -198,12 +198,12 @@ def t_prime_calculation(dd_data,
     """
 
     # Calculate binned temperature using all series min, max
-    if all_series:
-        t_max, t_min = dask.compute(dd_data[temp_var].max(), dd_data[temp_var].min())
-        range_cuts = np.arange(t_min, t_max, cut_interval)
-    else:
-        t_max, t_min = max_min
-        range_cuts = np.arange(t_min, t_max, cut_interval)
+    #if all_series:
+    #    t_max, t_min = dask.compute(dd_data[temp_var].max(), dd_data[temp_var].min())
+    #    range_cuts = np.arange(t_min, t_max, cut_interval)
+    #else:
+    #    t_max, t_min = max_min
+    #    range_cuts = np.arange(t_min, t_max, cut_interval)
 
     # Calculate area weights
     area_weights = area_calculation_real_area(dd_data=dd_data,
@@ -238,7 +238,7 @@ def t_prime_calculation(dd_data,
     t_ref = test_p.compute()
     t_ref_df_noidx = t_ref.reset_index(drop=True)
     merge_data = dd_data.merge(t_ref_df_noidx, on=['time', 'latitude'],
-                               how='left')
+                               how='inner')
 
     merge_data['t_prime'] = merge_data['t2m'] - merge_data['t_ref']
 
