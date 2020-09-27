@@ -5,6 +5,7 @@ import pathlib
 import xarray as xr
 import numpy as np
 import pandas as pd
+from dask.diagnostics import ProgressBar
 from descriptors import cachedproperty
 from distributed.client import _get_global_client
 from abc import ABC, abstractmethod 
@@ -35,13 +36,14 @@ class Template(ABC):
         self.temp_interval_size = temp_interval_size
         self.var = var
         self.subset_dict=subset_dict
+        self.outvars=['t_ref', 't_prime', self.temp_var]
 
     def __repr__(self):
 
         if isinstance(self.path_to_files, pathlib.Path):
-            product = self.path_to_files.name
+            product = self.path_to_files.stem
         else:
-            product = pathlib.Path(self.path_to_files).name
+            product = pathlib.Path(self.path_to_files).stem
         return f'''
                Climate product: {product} \n
                Grid size: ({self.lat_grid_size}, {self.lon_grid_size})
@@ -73,6 +75,7 @@ class Template(ABC):
 
         return xr_data
 
+    @property
     def data_array_dask_df(self):
         """ Return data array as dask DataFrame
         """
@@ -144,7 +147,7 @@ class Template(ABC):
         Returns: pd.DataFrame with cumulative area maps per time.
         """
 
-        df = self.data_array_dask_df().copy()
+        df = self.data_array_dask_df.copy()
         df['area_grid'] = df.lat.map_partitions(
             self._calculate_area_from_latitude
         )
@@ -222,7 +225,7 @@ class Template(ABC):
         areas_time = area_weights[area_weights['time'] == unique_time]
 
         # Interpolate to calculate the t_ref latitde mapping
-        t_ref = np.interp(ddf.latitude.unique(),
+        t_ref = np.interp(ddf.lat.unique(),
                           np.flip(areas_time[cdf_lat_effs]),
                           np.flip(areas_time[temp_binedges])
                           )
@@ -230,12 +233,12 @@ class Template(ABC):
         t_ref_df = pd.DataFrame({
             't_ref': t_ref,
             'time': unique_time,
-            'latitude': ddf.latitude.unique()
+            'lat': ddf.lat.unique()
         })
 
         return t_ref_df
 
-
+    @cachedproperty
     def t_prime_calculation(self): 
         """ Jet-stream metric
 
@@ -244,7 +247,7 @@ class Template(ABC):
 
         client = _get_global_client()
 
-        meta = pd.DataFrame([], columns=["t_ref", 'time', 'latitude'],
+        meta = pd.DataFrame([], columns=["t_ref", 'time', 'lat'],
                             index=pd.Index([], name="time"), dtype=str)
 
         # Calculate effective latitudes by using the temperature area weights
@@ -259,28 +262,44 @@ class Template(ABC):
 
         # Merge and calculate t_ref by time partition
         # Note: dask arrays need metadata on the returning object
-        test_p = self.data_array_dask_df.groupby(['time']).apply(self._temp_ref,
+        t_ref_lazy = self.data_array_dask_df.groupby(['time']).apply(self._temp_ref,
                                                   area_weights=area_weights,
                                                   temp_binedges='temp_bracket',
                                                   cdf_lat_effs='eff_lat_deg',
                                                   meta=meta
-                                                  ) 
-        t_ref = test_p.compute()
-        t_ref_df_noidx = t_ref.reset_index(drop=True)
-        merge_data = dd_data.merge(t_ref_df_noidx, 
-                                  on=['time', 'latitude'],
-                                  how='inner')
+                                                  )
 
-        merge_data['t_prime'] = merge_data['t2m'] - merge_data['t_ref']
+        # Calculate t_refs and then merge with raw data
+        with ProgressBar():
+            t_ref = t_ref_lazy.compute()
+
+        t_ref_df_noidx = t_ref.reset_index(drop=True)
+        merge_data = self.data_array_dask_df.merge(t_ref_df_noidx, 
+                                                   on=['time', 'lat'],
+                                                   how='inner')
+        merge_data['t_prime'] = merge_data[self.temp_var] - merge_data['t_ref']
+
+        # Compute merge dask object and save
+        self.dask_data_to_xarray(df=merge_data)
+
         return merge_data
 
-    @property
+    @cachedproperty
+    def demean(self,
+               df):
+        """ Demean array results on xarray object
+
+        Demean array values using two main strategies: 
+         - take the day of the year mean and calculate anomaly using that mean. 
+         - calculate `rolling` window and take within-window mean. Then,
+           calculate anomaly using the window mean. 
+
+        Return: xarray Dataset or saved object
+        """
+        pass
+
     def dask_data_to_xarray(self,
-                            df,
-                            dims,
-                            shape=None,
-                            path=None,
-                            target_variable='t2m'):
+                            df):
         """
         Transform delayed dask.DataFrame to xarray object
 
@@ -304,21 +323,28 @@ class Template(ABC):
         var_array.compute_chunk_sizes()
 
         if shape is None:
-            shape = tuple([len(df[dim].unique()) for dim in dims])
+            shape = tuple([len(df[dim].unique()) for dim in self.DIMS])
 
         var_array_reshape = var_array.reshape(shape)
 
-        dims_values = [df[dim].unique() for dim in dims]
-        coords_dict = dict(zip(dims, dims_values))
+        dims_values = [df[dim].unique() for dim in self.DIMS]
+        coords_dict = dict(zip(self.DIMS, dims_values))
 
         xarr = xr.DataArray(var_array_reshape.compute(),
-                            dims = dims,
+                            dims = self.DIMS,
                             coords = coords_dict
                            )
         if self.path_to_save_files is not None:
+            if isinstance(self.path_to_files, pathlib.Path):
+                product = self.path_to_files.stem
+            else:
+                product = pathlib.Path(self.path_to_files).stem
+ 
             path_save = os.path.join(self.path_to_save_files,
-                                     f'{self.name_ds}_{target_variable}.nc4')
-            xarr.to_netcdf(path_save)
+                                     f'{self.name_ds}_processed.nc4')
+            save_array = xarr.to_netcdf(path_save, compute=False)
+            with ProgressBar():
+                save_array.compute()
 
         return xarr
 
