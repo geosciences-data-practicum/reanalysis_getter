@@ -12,6 +12,7 @@ from datetime import datetime
 
 from src.utils import day_hours, date_elements
 
+
 def build_request_dict(start_date,
                        end_date,
                        variables_of_interest,
@@ -53,7 +54,7 @@ def build_request_dict(start_date,
             'year': years,
             'month': months,
             'day': days,
-            'time': time
+            'time': time,
         }
     elif 'sfc' not in pressure_levels: 
         dict_request = {
@@ -64,15 +65,15 @@ def build_request_dict(start_date,
             'year': years,
             'month': months,
             'day': days,
-            'time': time
+            'time': time,
         }
 
     return dict_request
 
 
-def request_wrapper(file_name,
-                    path,
-                    wait_queue = True,
+def request_wrapper( path,
+                    wait_queue=True,
+                    file_name=None,
                     **kwargs):
     """
     Make request to ECMWF API. 
@@ -102,6 +103,9 @@ def request_wrapper(file_name,
         c = cdsapi.Client()
         dict_params = build_request_dict(start_date = kwargs['start_date'],
                                          end_date = kwargs['end_date'],
+                                         months=kwargs['months'],
+                                         days=kwargs['days'],
+                                         years=kwargs['years'],
                                          variables_of_interest = kwargs['variables_of_interest'],
                                          subday_frequency = kwargs['subday_frequency'],
                                          pressure_levels = kwargs ['pressure_levels']
@@ -112,4 +116,4 @@ def request_wrapper(file_name,
         else:
             c.retrieve('reanalysis-era5-pressure-levels', dict_params, nc_file_path)
     else:
-        logger.info(f'{nc_file_path} already exists in path') 
+        print(f'{nc_file_path} already exists in path') 

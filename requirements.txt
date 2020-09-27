@@ -6,4 +6,7 @@ jupyter
 xarray
 iris
 cdsapi
-
+seaborn
+cartopy
+job-queue
+netcdf4

@@ -3,6 +3,7 @@ Basic I/O functions to load/unload xarray data from reanalysis
 """
 
 import os
+import dask
 import xarray as xr
 import pandas as pd
 from pathlib import Path
@@ -36,7 +37,7 @@ def preprocesser(ds,
                 ds.time.isin(date_array), drop=True)
 
         else:
-            raise ValueError(f'{years_in_ds} are more than the desired years')
+            raise ValueError(f'{years_in_array} are more than the desired years')
 
     else:
         date_array =  pd.daate_range(start_date, end_date, freq=freq)
@@ -47,11 +48,31 @@ def preprocesser(ds,
     return ds_subset
 
 
-def reader_n_cutter(path_to_file,
-                    spatial_selection,
-                    resample_window,
-                    save_local=False,
-                    regex=True):
+def model_reader_cutter(path_to_file,
+                       spatial_selection):
+
+    # Check files and set I/O
+    if isinstance(path_to_file, list):
+        nc_files_list = [xr.load_dataset(path) for path in path_to_file]
+        nc_files = xr.auto_combine(nc_files_list, concat_dim='time')
+    elif isinstance(path_to_file, str) and regex is True:
+        nc_files = xr.open_mfdataset(path_to_file, 
+                                     combine='by_coords',
+                                     parallel=True,
+                                     preprocess=preprocesser)
+    else:
+        nc_files = xr.open_dataset(path_to_file)
+
+    # Set coordinate names
+    pass
+
+
+
+def era5_reader_n_cutter(path_to_file,
+                         spatial_selection,
+                         resample_window,
+                         save_local=False,
+                         regex=True):
     """
     Read file and process to desired location and date. 
 
@@ -85,7 +106,8 @@ def reader_n_cutter(path_to_file,
                 nc_files_space_filter = nc_files.where(nc_files.latitude >
                                                        spatial_selection[0],
                                                        drop=True)
-                filename = f'df_lat_{spatial_selection[0]}_{resample_window}'
+
+                filename = f'df_lat_{spatial_selection[0]}_lon_{spatial_selection[0]}_{resample_window}'
 
             elif len(spatial_selection) == 2:
                 nc_files_space_filter = nc_files.where( 
@@ -93,6 +115,7 @@ def reader_n_cutter(path_to_file,
                     (nc_files.longitude > spatial_selection[1]),
                     drop=True
                 )
+
                 filename = f'df_lat_{spatial_selection[0]}_lon_{spatial_selection[0]}_{resample_window}'
 
             else:
@@ -104,6 +127,8 @@ def reader_n_cutter(path_to_file,
         resample_filter = nc_files_space_filter.sortby('time').resample(time=resample_window).mean()
         resample_filter = resample_filter.dropna(dim='time')
 
+        if isinstance(path_to_file, Path):
+            filename = f'{path_to_file.stem}_resample'
         if save_local == 'csv':
             ds_df = resample_filter.to_dataframe().reset_index(drop=False)
             ds_df.to_csv(f'{filename}.csv', index=False)
@@ -117,4 +142,5 @@ def reader_n_cutter(path_to_file,
              f"but the Database dims are: {ds_dims}"
             )
         )
+
 

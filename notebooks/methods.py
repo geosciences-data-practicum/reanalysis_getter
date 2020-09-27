@@ -197,14 +197,6 @@ def t_prime_calculation(dd_data,
     Return: A delayed dask.DataFrame with the t-prime, t-ref. 
     """
 
-    # Calculate binned temperature using all series min, max
-    #if all_series:
-    #    t_max, t_min = dask.compute(dd_data[temp_var].max(), dd_data[temp_var].min())
-    #    range_cuts = np.arange(t_min, t_max, cut_interval)
-    #else:
-    #    t_max, t_min = max_min
-    #    range_cuts = np.arange(t_min, t_max, cut_interval)
-
     # Calculate area weights
     area_weights = area_calculation_real_area(dd_data=dd_data,
                                               grid_lat=grid_lat,
@@ -287,4 +279,29 @@ def dask_data_to_xarray(df,
     return xarr
 
 
+def demeaning(path_to_arrays,
+              regex=None,
+              name='tprime',
+              window_size=None,
+              method='full') :
 
+    """
+    Demean t_prime using a list of files
+    """
+
+    if regex is None:
+        paths = Path(path_to_arrays).rglob('*.nc4')
+    else:
+        paths = Path(path_to_arrays).rglob(regex)
+
+    xarray_paths = xr.open_mfdataset(paths,
+                                     combine='by_coords',
+                                     preprocess=preprocess)
+    xarray_paths.rename({'__xarray_dataarray_variable__': name})
+
+    if method == 'full':
+        time_days = xarray_paths.groupby('time.dayofyear').mean().compute()
+        total_demean = xarray_paths.groupby('time.dayofyear') - time_days
+
+    elif method == 'rolling':
+        pass
