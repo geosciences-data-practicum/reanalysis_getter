@@ -1,4 +1,4 @@
-from .template import Template
+from jetstream.model.template import Template
 
 class Model(Template):
     """ Methods template for GCM

@@ -1,4 +1,4 @@
-from .template import Template
+from jetstream.model.template import Template
 
 class Analysis(Template):
     """ Methods template for reanalysis data
