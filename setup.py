@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 setup(
-    name='your_package_name',
+    name='jetstream',
     version='0.0.1',
     author=['Ivan Higuera-Mendieta',
             'Amanda Farah',
@@ -11,10 +11,4 @@ setup(
     include_package_data=True,
     url="",
     packages= find_packages(),
-    install_requires=[
-        'dask',
-        'xarray',
-        'pandas',
-        'numpy'
-    ]
 )
