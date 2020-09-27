@@ -10,7 +10,7 @@ import cdsapi
 import logging
 from datetime import datetime
 
-from src.utils import day_hours, date_elements
+from jetstream.utils import day_hours, date_elements
 
 
 def build_request_dict(start_date,
