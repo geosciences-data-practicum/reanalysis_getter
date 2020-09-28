@@ -1,3 +1,7 @@
+import cftime
+import xarray as xr
+from descriptors import cachedproperty
+from distributed.client import _get_global_client
 from jetstream.model.template import Template
 
 class Model(Template):
@@ -5,6 +9,33 @@ class Model(Template):
     """
 
     temp_var = 'tas'
+
+    @cachedproperty
+    def data_array(self):
+        """ Lazy load model/analysis data into memory. 
+        """
+
+        client = _get_global_client()
+
+        xr_data = xr.open_mfdataset(self.path_to_files,
+                                 chunks=self.chunks,
+                                 parallel=True)
+
+        if not all(x in list(xr_data.coords) for x in self.DIMS):
+            xr_data = xr_data.rename({
+                'latitude': 'lat',
+                'longitude': 'lon',
+            })
+
+        if isinstance(xr_data.time.values[0], cftime._cftime.DatetimeNoLeap):
+            datetime_index = xr_data.indexes['time'].to_datetimeindex()
+            xr_data['time'] = datetime_index
+
+        if self.subset_dict is not None:
+            xr_data = self.cut(xr_data)
+            print('Cut data')
+
+        return xr_data
 
     def cut(self, array_obj):
         """ Wrapper function to slice GCM using a dictionary

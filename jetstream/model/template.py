@@ -5,6 +5,7 @@ import pathlib
 import xarray as xr
 import numpy as np
 import pandas as pd
+import bottleneck as bn
 from dask.diagnostics import ProgressBar
 from descriptors import cachedproperty
 from distributed.client import _get_global_client
@@ -22,7 +23,7 @@ class Template(ABC):
     """
 
     chunks = {'time': 1}
-    DIMS = ['lat', 'lon', 'time']
+    DIMS = ['time', 'lat', 'lon']
     R_EARTH = 6367.47
 
     def __init__(self,
@@ -69,6 +70,7 @@ class Template(ABC):
                 'longitude': 'lon',
             })
 
+
         if self.subset_dict is not None:
             xr_data = self.cut(xr_data)
             print('Cut data')
@@ -79,7 +81,7 @@ class Template(ABC):
     def data_array_dask_df(self):
         """ Return data array as dask DataFrame
         """
-        return self.data_array.to_dask_dataframe(dim_order=['time', 'lat', 'lon'])
+        return self.data_array.to_dask_dataframe(dim_order=self.DIMS)
 
     @abstractmethod
     def cut(self, array_obj):
@@ -280,13 +282,12 @@ class Template(ABC):
         merge_data['t_prime'] = merge_data[self.temp_var] - merge_data['t_ref']
 
         # Compute merge dask object and save
-        self.dask_data_to_xarray(df=merge_data)
+        #xr_data = self.dask_data_to_xarray(df=merge_data)
 
         return merge_data
 
     @cachedproperty
-    def demean(self,
-               df):
+    def demean(self, xr_obj):
         """ Demean array results on xarray object
 
         Demean array values using two main strategies: 
@@ -296,7 +297,48 @@ class Template(ABC):
 
         Return: xarray Dataset or saved object
         """
-        pass
+
+        var = 't_prime'
+
+        xr_mean = self.t_prime_calculation[var].\
+            groupby('time.dayofyear').\
+            mean().\
+            compute()
+
+        total_demean = total.groupby('time.dayofyear') - time_days
+
+        return total_demean
+
+    @cachedproperty
+    def boxcar_demean(self, xr_obj):
+        """ Movinig average demean array results on xarray object
+
+        Demean array values using two main strategies: 
+         - take the day of the year mean and calculate anomaly using that mean. 
+         - calculate `rolling` window and take within-window mean. Then,
+           calculate anomaly using the window mean. 
+
+        Return: xarray Dataset or saved object
+        """
+
+        var = 't_prime'
+
+        df = self.t_prime_calculation[var]
+
+        meta = pd.DataFrame([], columns=['t_prime', 'boxcar'])
+
+        def moving_average(df):
+            df['time'] = pd.to_datetime(df.time)
+            df = df[['t_prime', 'time']].set_index('time')
+            df['boxcar'] = df.t_prime.rolling(window='10D')
+
+            return df
+
+        xr_ddf = xarr.to_dask_dataframe()[['lat', 'lon', 'time', 't_prime']]
+        xr_ddf.groupby(['lat', 'lon']).apply(moving_average, meta=meta).compute()
+        total_demean = total.groupby('time.dayofyear') - time_days
+
+        return total_demean
 
     def dask_data_to_xarray(self,
                             df):
@@ -309,39 +351,37 @@ class Template(ABC):
 
         Parameters:
             - df (dask.DataFrame): a delayed Dask dataframe.
-            - dims (list): list of column names with the array dimensions. Usually
-            time, lat and lon. 
-            - shape (tuple): shape of xarray. If None, the function will calculate
-            the shape with the dimension sizes. Default is None. 
-            - path (str): Path to save file. Default is None.
-           - target_variable: variable(s) to include in the xarray.
 
         Return: xarray Dataset
         """
 
-        var_array = df[target_variable].values
-        var_array.compute_chunk_sizes()
+        shape = tuple([len(self.t_prime_calculation[dim].unique()) for dim in
+                       self.DIMS])
 
-        if shape is None:
-            shape = tuple([len(df[dim].unique()) for dim in self.DIMS])
+        values_arrays = []
+        for variable in self.outvars:
+            var_array = self.t_prime_calculation[variable].values
+            var_array.compute_chunk_sizes()
+            var_array_reshape = var_array.reshape(shape)
+            tuple_data = (self.DIMS, var_array_reshape)
+            values_arrays.append(tuple_data)
 
-        var_array_reshape = var_array.reshape(shape)
-
-        dims_values = [df[dim].unique() for dim in self.DIMS]
+        dims_values = [self.t_prime_calculation[dim].unique() for dim in self.DIMS]
         coords_dict = dict(zip(self.DIMS, dims_values))
+        values_dicts = dict(zip(self.outvars, values_arrays))
 
-        xarr = xr.DataArray(var_array_reshape.compute(),
-                            dims = self.DIMS,
-                            coords = coords_dict
-                           )
-        if self.path_to_save_files is not None:
+        xarr = xr.Dataset(values_dicts,
+                          coords=coords_dict
+                          )
+
+        if self.path_to_save is not None:
             if isinstance(self.path_to_files, pathlib.Path):
                 product = self.path_to_files.stem
             else:
                 product = pathlib.Path(self.path_to_files).stem
- 
-            path_save = os.path.join(self.path_to_save_files,
-                                     f'{self.name_ds}_processed.nc4')
+
+            path_save = os.path.join(self.path_to_save,
+                                     f'{product}_processed.nc4')
             save_array = xarr.to_netcdf(path_save, compute=False)
             with ProgressBar():
                 save_array.compute()
