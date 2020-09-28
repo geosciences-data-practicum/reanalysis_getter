@@ -47,7 +47,7 @@ function build-env () {
 
     set +u +e
 
-    module load Anaconda3
+    module load python/anaconda-2019.03
     eval "$(command conda 'shell.bash' 'hook' 2> /dev/null)"
     ENV=$(conda env list | grep ${ENV_NAME} | wc -l)
     
@@ -66,7 +66,7 @@ function ganymede () {
     
     IP=$(/sbin/ip route get 8.8.8.8 | head -n 1 | awk '{print $NF}')
 
-    module load Anaconda3
+    module load python/anaconda-2019.03
     jupyter notebook --no-browser --port=$PORT --ip $IP
 
 }
