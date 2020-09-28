@@ -50,9 +50,13 @@ class Template(ABC):
                Grid size: ({self.lat_grid_size}, {self.lon_grid_size})
                '''
 
-    def template_methods():
-        self.calculate_t_prime()
-        self.demean()
+    @cachedproperty
+    def pipeline_methods(self):
+        xr_obj = self.dask_data_to_xarray(
+            df=self.t_prime_calculation)
+        xr_demean = self.demean
+
+        return xr_demean
 
     @cachedproperty
     def data_array(self):
@@ -116,7 +120,6 @@ class Template(ABC):
             lon_diff = np.mean(lon_diff)
 
         return lon_diff
-
 
     def _calculate_area_from_latitude(self, latitude):
         """
@@ -287,34 +290,34 @@ class Template(ABC):
         return merge_data
 
     @cachedproperty
-    def demean(self, xr_obj):
+    def demean(self):
         """ Demean array results on xarray object
 
         Demean array values using two main strategies: 
          - take the day of the year mean and calculate anomaly using that mean. 
-         - calculate `rolling` window and take within-window mean. Then,
-           calculate anomaly using the window mean. 
 
         Return: xarray Dataset or saved object
         """
 
-        var = 't_prime'
+        xr_obj =  self.dask_data_to_xarray(
+            df=self.t_prime_calculation,
+            var='t_prime'
+        )
 
-        xr_mean = self.t_prime_calculation[var].\
+        xr_mean = xr_obj.\
             groupby('time.dayofyear').\
             mean().\
             compute()
 
-        total_demean = total.groupby('time.dayofyear') - time_days
+        total_demean = xr_obj.groupby('time.dayofyear') - xr_mean
 
-        return total_demean
+        return total_demean.compute()
 
     @cachedproperty
     def boxcar_demean(self, xr_obj):
         """ Movinig average demean array results on xarray object
 
         Demean array values using two main strategies: 
-         - take the day of the year mean and calculate anomaly using that mean. 
          - calculate `rolling` window and take within-window mean. Then,
            calculate anomaly using the window mean. 
 
@@ -338,10 +341,11 @@ class Template(ABC):
         xr_ddf.groupby(['lat', 'lon']).apply(moving_average, meta=meta).compute()
         total_demean = total.groupby('time.dayofyear') - time_days
 
-        return total_demean
+        return total_demean.compute()
 
     def dask_data_to_xarray(self,
-                            df):
+                            df,
+                            var=None):
         """
         Transform delayed dask.DataFrame to xarray object
 
@@ -358,8 +362,13 @@ class Template(ABC):
         shape = tuple([len(self.t_prime_calculation[dim].unique()) for dim in
                        self.DIMS])
 
+        if var is not None:
+            extract_vars = [var]
+        else:
+            extract_vars = self.outvars
+
         values_arrays = []
-        for variable in self.outvars:
+        for variable in extract_vars:
             var_array = self.t_prime_calculation[variable].values
             var_array.compute_chunk_sizes()
             var_array_reshape = var_array.reshape(shape)
@@ -382,9 +391,7 @@ class Template(ABC):
 
             path_save = os.path.join(self.path_to_save,
                                      f'{product}_processed.nc4')
-            save_array = xarr.to_netcdf(path_save, compute=False)
-            with ProgressBar():
-                save_array.compute()
+            save_array = xarr.to_netcdf(path_save)
 
         return xarr
 
