@@ -186,7 +186,8 @@ class Template(ABC):
         This is an intermediate step to calculate both Tref and T_prime.
 
         Parameteres:
-        - cdf_areas (np.array or pd.Series) Cumulative area.
+        - cdf_areas (np.array or pd.Series) Cumulative area in squared
+          kilometers (km^2).
 
         Returns: np.array with cumulative effective latitudes organized by
         temperature bucket. 
@@ -314,34 +315,37 @@ class Template(ABC):
         return total_demean.compute()
 
     @cachedproperty
-    def boxcar_demean(self, xr_obj):
+    def boxcar_demean(self, xr_obj, window):
         """ Movinig average demean array results on xarray object
 
         Demean array values using two main strategies: 
          - calculate `rolling` window and take within-window mean. Then,
            calculate anomaly using the window mean. 
 
+        Args:
+         - xr_obj: xarray.Dataset or xarray.Dataarray object
+         - window: str a time offset to build window. See `pandas` rolling
+           documentation. For now, the offset should be defined in days.
+
         Return: xarray Dataset or saved object
         """
 
         var = 't_prime'
-
         df = self.t_prime_calculation[var]
-
         meta = pd.DataFrame([], columns=['t_prime', 'boxcar'])
 
         def moving_average(df):
             df['time'] = pd.to_datetime(df.time)
             df = df[['t_prime', 'time']].set_index('time')
-            df['boxcar'] = df.t_prime.rolling(window='10D')
+            df['boxcar'] = df.t_prime.rolling(window=window)
 
             return df
 
         xr_ddf = xarr.to_dask_dataframe()[['lat', 'lon', 'time', 't_prime']]
-        xr_ddf.groupby(['lat', 'lon']).apply(moving_average, meta=meta).compute()
-        total_demean = total.groupby('time.dayofyear') - time_days
+        xr_ddf = xr_ddf.groupby(['lat', 'lon']).apply(moving_average, meta=meta).compute()
+        
 
-        return total_demean.compute()
+        return xr_ddf
 
     def dask_data_to_xarray(self,
                             df,
