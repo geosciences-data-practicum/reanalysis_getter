@@ -35,7 +35,7 @@ class Model(Template):
             xr_data = self.cut(xr_data)
             print('Cut data')
 
-        return xr_data
+        return xr_data[self.DIMS + [self.temp_var]].squeeze()
 
     def cut(self, array_obj):
         """ Wrapper function to slice GCM using a dictionary

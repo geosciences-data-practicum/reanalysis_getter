@@ -39,24 +39,33 @@ class Template(ABC):
         self.subset_dict=subset_dict
         self.outvars=['t_ref', 't_prime', self.temp_var]
 
-    def __repr__(self):
-
         if isinstance(self.path_to_files, pathlib.Path):
-            product = self.path_to_files.stem
+            self.product = self.path_to_files.stem
         else:
-            product = pathlib.Path(self.path_to_files).stem
-        return f'''
-               Climate product: {product} \n
+            self.product = pathlib.Path(self.path_to_files).stem
+
+
+    def __repr__(self):
+       return f'''
+               Climate product: {self.product} \n
                Grid size: ({self.lat_grid_size}, {self.lon_grid_size})
                '''
 
     @cachedproperty
     def pipeline_methods(self):
+
+        dir = self.build_save_dirs()
         xr_obj = self.dask_data_to_xarray(
             df=self.t_prime_calculation)
-        xr_demean = self.demean
 
-        return xr_demean
+        if self.subset_dict is not None: 
+            time_slice = self.subset_dict['time']
+            filename = f'{self.product}_output_{time_slice.start}_{time_slice.stop}.nc4'
+        else:
+            filename = f'{self.product}_output.nc4'
+
+        xr_obj.to_netcdf(os.path.join(dir, filename))
+        return None
 
     @cachedproperty
     def data_array(self):
@@ -286,12 +295,12 @@ class Template(ABC):
         merge_data['t_prime'] = merge_data[self.temp_var] - merge_data['t_ref']
 
         # Compute merge dask object and save
-        #xr_data = self.dask_data_to_xarray(df=merge_data)
+        xr_data = self.dask_data_to_xarray(df=merge_data)
 
         return merge_data
 
     @cachedproperty
-    def demean(self):
+    def demean(self, xr_obj=None):
         """ Demean array results on xarray object
 
         Demean array values using two main strategies: 
@@ -300,10 +309,11 @@ class Template(ABC):
         Return: xarray Dataset or saved object
         """
 
-        xr_obj =  self.dask_data_to_xarray(
-            df=self.t_prime_calculation,
-            var='t_prime'
-        )
+        if xr_obj is None:
+            xr_obj =  self.dask_data_to_xarray(
+                df=self.t_prime_calculation,
+                var='t_prime'
+            )
 
         xr_mean = xr_obj.\
             groupby('time.dayofyear').\
@@ -398,4 +408,14 @@ class Template(ABC):
             save_array = xarr.to_netcdf(path_save)
 
         return xarr
+
+    def build_save_dirs(self):
+        if self.path_to_save_files is not None:
+            product_dir = os.path.join(self.path_to_save_files,
+                                       self.product)
+            if not os.path.exists(product_dir):
+                os.mkdirs(product_dir)
+
+        return product_dir
+
 
