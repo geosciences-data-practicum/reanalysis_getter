@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-#SFLAGS="--account=edu --reservation=edu_15"
 SFLAGS="--account=geos39650 --partition=broadwl"
 
 echo "Launching dask scheduler"
