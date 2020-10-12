@@ -10,8 +10,7 @@ PATH_TO_DASK=${SCRATCH}/reanalysis_env/bin
 
 dask-worker --scheduler-file scheduler.json \
 	    --memory-limit 10e9 \
-	    --interface ib0 \
-	    --local-directory ${HOME}
+	    --interface ib0 
 
 sleep infinity
 

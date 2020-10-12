@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+PATH_TO_RAW_MODEL=$1
+NUMBER_OF_WORKERS=$2
+
 SFLAGS="--account=geos39650 --partition=broadwl"
 
 echo "Launching dask scheduler"
@@ -9,7 +12,7 @@ sjob=${s%.*}
 echo ${s}
 
 echo "Launching dask workers (${workers})"
-sbatch $SFLAGS --array=0-6 launch-dask-worker.sh
+sbatch $SFLAGS --array=0-${NUMBER_OF_WORKERS} launch-dask-worker.sh
 
 squeue --job ${sjob}
 
@@ -27,7 +30,8 @@ if [[ -z $WORKDIR ]]; then
     WORKDIR=/local
 fi
 
-default=$HOME
-notebook=${2:-$default}
-echo "Setting up Jupyter Lab, Notebook dir: ${notebook}"
-
+# Launcing model
+echo "Launching model in workers"
+./runner.py --product_path $1 \
+	    ---save_path $2 \
+	    --time_step 5
