@@ -5,6 +5,8 @@ PATH_TO_RAW_MODEL=$1
 PATH_TO_SAVE=$2
 NUMBER_OF_WORKERS=$3
 
+PYTHON_PATH=${SCRATCH}/reanalysis_env/bin/python
+
 echo "Launching dask scheduler"
 s=`sbatch launch-dask-scheduler.sh | cut -d " " -f 4`
 sjob=${s%.*}
@@ -31,6 +33,6 @@ fi
 
 # Launcing model
 echo "Launching model in workers"
-./runner.py --product_path $PATH_TO_RAW_MODEL \
+$PYTHON_PATH runner.py --product_path $PATH_TO_RAW_MODEL \
 	    --save_path $PATH_TO_SAVE \
 	    --time_step 5
