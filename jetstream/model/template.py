@@ -293,9 +293,7 @@ class Template(ABC):
                                                    on=['time', 'lat'],
                                                    how='inner')
         merge_data['t_prime'] = merge_data[self.temp_var] - merge_data['t_ref']
-
-        # Compute merge dask object and save
-        xr_data = self.dask_data_to_xarray(df=merge_data)
+        merge_data =  client.persist(merge_data)
 
         return merge_data
 
@@ -353,7 +351,7 @@ class Template(ABC):
 
         xr_ddf = xarr.to_dask_dataframe()[['lat', 'lon', 'time', 't_prime']]
         xr_ddf = xr_ddf.groupby(['lat', 'lon']).apply(moving_average, meta=meta).compute()
-        
+ 
 
         return xr_ddf
 
@@ -397,16 +395,6 @@ class Template(ABC):
                           coords=coords_dict
                           )
 
-        if self.path_to_save is not None:
-            if isinstance(self.path_to_files, pathlib.Path):
-                product = self.path_to_files.stem
-            else:
-                product = pathlib.Path(self.path_to_files).stem
-
-            path_save = os.path.join(self.path_to_save,
-                                     f'{product}_processed.nc4')
-            save_array = xarr.to_netcdf(path_save)
-
         return xarr
 
     def build_save_dirs(self):
@@ -414,7 +402,7 @@ class Template(ABC):
             product_dir = os.path.join(self.path_to_save_files,
                                        self.product)
             if not os.path.exists(product_dir):
-                os.mkdirs(product_dir)
+                os.mkdir(product_dir)
 
         return product_dir
 
