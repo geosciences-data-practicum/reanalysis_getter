@@ -1,7 +1,3 @@
-"""
-Utility functions to call the CDS API 
-"""
-
 from dateutil.relativedelta import relativedelta
 from datetime import datetime, timedelta
 
@@ -33,9 +29,4 @@ def day_hours(delta={'hours': 1}):
         day_start += step
 
     return day_hours_list
-
-
-
-
-
 

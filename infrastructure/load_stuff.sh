@@ -67,7 +67,7 @@ function ganymede () {
     IP=$(/sbin/ip route get 8.8.8.8 | head -n 1 | awk '{print $NF}')
 
     module load Anaconda3
-    jupyter notebook --no-browser --port=$1 --ip $IP
+    jupyter notebook --no-browser --port=$PORT --ip $IP
 
 }
 

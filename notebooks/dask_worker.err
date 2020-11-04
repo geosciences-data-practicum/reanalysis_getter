@@ -1,0 +1,445 @@
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.222.124:34121'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.222.6:35079'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.68:39648'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.105:34154'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.98:46880'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.46:40482'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.109:33316'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.109:43066'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.107:40917'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.107:39070'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.154:37936'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.62:40321'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.62:36229'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.125:32787'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.125:40544'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.222.28:45769'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.222.28:45414'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.152:44579'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.152:39562'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.222.74:41528'
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-80tlsn5y', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-86qnko4r', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-hqhq3ff4', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-67zpcyb4', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-o4w1w0q3', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-hfgvkjrj', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-qimeerth', purging
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.190:40862'
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-1315yzhr', purging
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.190:42735'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.252:40299'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.252:40258'
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-sntwvoa8', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-sntwvoa8', purging
+distributed.diskutils - ERROR - Failed to remove '/scratch/midway2/ivanhigueram/worker-sntwvoa8/storage' (failed in <built-in function rmdir>): [Errno 2] No such file or directory: 'storage'
+distributed.diskutils - ERROR - Failed to remove '/scratch/midway2/ivanhigueram/worker-sntwvoa8' (failed in <built-in function rmdir>): [Errno 2] No such file or directory: '/scratch/midway2/ivanhigueram/worker-sntwvoa8'
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-uzryfky7', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-uzryfky7', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-uzryfky7', purging
+distributed.diskutils - ERROR - Failed to remove '/scratch/midway2/ivanhigueram/worker-uzryfky7' (failed in <built-in function lstat>): [Errno 2] No such file or directory: '/scratch/midway2/ivanhigueram/worker-uzryfky7'
+distributed.diskutils - ERROR - Failed to remove '/scratch/midway2/ivanhigueram/worker-uzryfky7' (failed in <built-in function lstat>): [Errno 2] No such file or directory: '/scratch/midway2/ivanhigueram/worker-uzryfky7'
+distributed.nanny - INFO -         Start Nanny at: 'tcp://172.25.221.38:45649'
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-m87tpx_k', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-330arm3d', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-m87tpx_k', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-m87tpx_k', purging
+distributed.diskutils - ERROR - Failed to remove '/scratch/midway2/ivanhigueram/worker-m87tpx_k' (failed in <built-in function lstat>): [Errno 2] No such file or directory: '/scratch/midway2/ivanhigueram/worker-m87tpx_k'
+distributed.diskutils - ERROR - Failed to remove '/scratch/midway2/ivanhigueram/worker-m87tpx_k' (failed in <built-in function lstat>): [Errno 2] No such file or directory: '/scratch/midway2/ivanhigueram/worker-m87tpx_k'
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-998h8cip', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-998h8cip', purging
+distributed.diskutils - ERROR - Failed to remove '/scratch/midway2/ivanhigueram/worker-998h8cip' (failed in <built-in function lstat>): [Errno 2] No such file or directory: '/scratch/midway2/ivanhigueram/worker-998h8cip'
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-ttmntctf', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-xu28tab3', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-ttmntctf', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-ajdyxqgc', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-xu28tab3', purging
+distributed.diskutils - ERROR - Failed to remove '/scratch/midway2/ivanhigueram/worker-ttmntctf' (failed in <built-in function lstat>): [Errno 2] No such file or directory: '/scratch/midway2/ivanhigueram/worker-ttmntctf'
+distributed.diskutils - ERROR - Failed to remove '/scratch/midway2/ivanhigueram/worker-xu28tab3' (failed in <built-in function lstat>): [Errno 2] No such file or directory: '/scratch/midway2/ivanhigueram/worker-xu28tab3'
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-h86w_kle', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-h86w_kle', purging
+distributed.diskutils - ERROR - Failed to remove '/scratch/midway2/ivanhigueram/worker-h86w_kle/storage' (failed in <built-in function rmdir>): [Errno 2] No such file or directory: 'storage'
+distributed.diskutils - ERROR - Failed to remove '/scratch/midway2/ivanhigueram/worker-h86w_kle' (failed in <built-in function rmdir>): [Errno 2] No such file or directory: '/scratch/midway2/ivanhigueram/worker-h86w_kle'
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-npo70wb0', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-z7bu2mw9', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-5ao8pj7r', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-5ao8pj7r', purging
+distributed.diskutils - ERROR - Failed to remove '/scratch/midway2/ivanhigueram/worker-5ao8pj7r' (failed in <built-in function lstat>): [Errno 2] No such file or directory: '/scratch/midway2/ivanhigueram/worker-5ao8pj7r'
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-wuww6uq8', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-eyr2kvg1', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-i4cb85ua', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-3r3htjtp', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-f1e1an0n', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-tjl6qkmh', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-b9qj8ve9', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-38t5h2q7', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-n6_irj5f', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-sp4tz2u4', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-d2b2r9a9', purging
+distributed.diskutils - INFO - Found stale lock file and directory '/scratch/midway2/ivanhigueram/worker-os2bs1y_', purging
+distributed.worker - INFO -       Start worker at:   tcp://172.25.222.6:42666
+distributed.worker - INFO -          Listening to:   tcp://172.25.222.6:42666
+distributed.worker - INFO -          dashboard at:         172.25.222.6:35019
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-h86w_kle
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.worker - INFO -       Start worker at: tcp://172.25.222.124:35768
+distributed.worker - INFO -          Listening to: tcp://172.25.222.124:35768
+distributed.worker - INFO -          dashboard at:       172.25.222.124:33771
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-ttmntctf
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.worker - INFO -       Start worker at:  tcp://172.25.221.98:35379
+distributed.worker - INFO -          Listening to:  tcp://172.25.221.98:35379
+distributed.worker - INFO -          dashboard at:        172.25.221.98:37828
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-sntwvoa8
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.worker - INFO -       Start worker at: tcp://172.25.221.105:38862
+distributed.worker - INFO -          Listening to: tcp://172.25.221.105:38862
+distributed.worker - INFO -          dashboard at:       172.25.221.105:43203
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-m87tpx_k
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -       Start worker at:  tcp://172.25.221.46:38063
+distributed.worker - INFO -          Listening to:  tcp://172.25.221.46:38063
+distributed.worker - INFO -          dashboard at:        172.25.221.46:41100
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-998h8cip
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.worker - INFO -       Start worker at: tcp://172.25.221.109:34953
+distributed.worker - INFO -       Start worker at: tcp://172.25.221.109:46259
+distributed.worker - INFO -          Listening to: tcp://172.25.221.109:34953
+distributed.worker - INFO -          Listening to: tcp://172.25.221.109:46259
+distributed.worker - INFO -          dashboard at:       172.25.221.109:44151
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO -          dashboard at:       172.25.221.109:33976
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-xu28tab3
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-eyr2kvg1
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -       Start worker at:  tcp://172.25.221.68:44419
+distributed.worker - INFO -          Listening to:  tcp://172.25.221.68:44419
+distributed.worker - INFO -          dashboard at:        172.25.221.68:44690
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-uzryfky7
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.worker - INFO -       Start worker at: tcp://172.25.221.107:39684
+distributed.worker - INFO -       Start worker at: tcp://172.25.221.107:36565
+distributed.worker - INFO -          Listening to: tcp://172.25.221.107:39684
+distributed.worker - INFO -          Listening to: tcp://172.25.221.107:36565
+distributed.worker - INFO -          dashboard at:       172.25.221.107:44973
+distributed.worker - INFO -          dashboard at:       172.25.221.107:43724
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-3r3htjtp
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-330arm3d
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.worker - INFO -       Start worker at:  tcp://172.25.221.62:43865
+distributed.worker - INFO -       Start worker at:  tcp://172.25.221.62:35231
+distributed.worker - INFO -          Listening to:  tcp://172.25.221.62:43865
+distributed.worker - INFO -          dashboard at:        172.25.221.62:43633
+distributed.worker - INFO -          Listening to:  tcp://172.25.221.62:35231
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO -          dashboard at:        172.25.221.62:44729
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-f1e1an0n
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-ajdyxqgc
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -       Start worker at:  tcp://172.25.222.28:44198
+distributed.worker - INFO -       Start worker at:  tcp://172.25.222.28:40962
+distributed.worker - INFO -          Listening to:  tcp://172.25.222.28:44198
+distributed.worker - INFO -          Listening to:  tcp://172.25.222.28:40962
+distributed.worker - INFO -          dashboard at:        172.25.222.28:41366
+distributed.worker - INFO -          dashboard at:        172.25.222.28:41986
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-npo70wb0
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-n6_irj5f
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -       Start worker at:  tcp://172.25.222.74:36005
+distributed.worker - INFO -          Listening to:  tcp://172.25.222.74:36005
+distributed.worker - INFO -          dashboard at:        172.25.222.74:41944
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-i4cb85ua
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -       Start worker at: tcp://172.25.221.125:35687
+distributed.worker - INFO -       Start worker at: tcp://172.25.221.152:34570
+distributed.worker - INFO -       Start worker at: tcp://172.25.221.152:45670
+distributed.worker - INFO -          Listening to: tcp://172.25.221.125:35687
+distributed.worker - INFO -          Listening to: tcp://172.25.221.152:34570
+distributed.worker - INFO -          dashboard at:       172.25.221.125:37920
+distributed.worker - INFO -          dashboard at:       172.25.221.152:42551
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -       Start worker at: tcp://172.25.221.154:33649
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -          Listening to: tcp://172.25.221.152:45670
+distributed.worker - INFO -          Listening to: tcp://172.25.221.154:33649
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-38t5h2q7
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-z7bu2mw9
+distributed.worker - INFO -          dashboard at:       172.25.221.154:44347
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -          dashboard at:       172.25.221.152:41607
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO -       Start worker at: tcp://172.25.221.125:42409
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -          Listening to: tcp://172.25.221.125:42409
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -       Start worker at: tcp://172.25.221.190:38125
+distributed.worker - INFO -       Start worker at: tcp://172.25.221.190:41604
+distributed.worker - INFO -          Listening to: tcp://172.25.221.190:38125
+distributed.worker - INFO -          dashboard at:       172.25.221.125:36104
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -          Listening to: tcp://172.25.221.190:41604
+distributed.worker - INFO -          dashboard at:       172.25.221.190:32906
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-wuww6uq8
+distributed.worker - INFO -          dashboard at:       172.25.221.190:41802
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-b9qj8ve9
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-5ao8pj7r
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-d2b2r9a9
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-tjl6qkmh
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.worker - INFO -       Start worker at: tcp://172.25.221.252:36210
+distributed.worker - INFO -       Start worker at: tcp://172.25.221.252:32905
+distributed.worker - INFO -          Listening to: tcp://172.25.221.252:36210
+distributed.worker - INFO -          dashboard at:       172.25.221.252:44991
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO -          Listening to: tcp://172.25.221.252:32905
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -          dashboard at:       172.25.221.252:46313
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-sp4tz2u4
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-os2bs1y_
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -       Start worker at:  tcp://172.25.221.38:40606
+distributed.worker - INFO -          Listening to:  tcp://172.25.221.38:40606
+distributed.worker - INFO -          dashboard at:        172.25.221.38:34547
+distributed.worker - INFO - Waiting to connect to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -               Threads:                          4
+distributed.worker - INFO -                Memory:                   20.00 GB
+distributed.worker - INFO -       Local Directory: /scratch/midway2/ivanhigueram/worker-_y_blf5c
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.core - INFO - Starting established connection
+distributed.core - INFO - Starting established connection
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.core - INFO - Starting established connection
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.core - INFO - Starting established connection
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.core - INFO - Starting established connection
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.core - INFO - Starting established connection
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO -         Registered to:  tcp://172.25.220.71:46737
+distributed.worker - INFO - -------------------------------------------------
+distributed.worker - INFO - -------------------------------------------------
+distributed.core - INFO - Starting established connection
+distributed.core - INFO - Starting established connection
+distributed.core - INFO - Event loop was unresponsive in Worker for 3.43s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 4.08s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 4.25s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 4.71s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 3.80s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 4.72s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 4.26s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 4.31s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 3.50s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 5.59s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 5.49s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 3.86s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 3.50s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 4.86s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 3.62s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 4.71s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 3.38s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 4.94s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 4.25s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 3.86s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 3.10s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 3.98s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.core - INFO - Event loop was unresponsive in Worker for 3.53s.  This is often caused by long-running GIL-holding functions or moving large chunks of data. This can cause timeouts and instability.
+distributed.utils_perf - INFO - full garbage collection released 13.46 MB from 1257 reference cycles (threshold: 10.00 MB)
+distributed.utils_perf - INFO - full garbage collection released 17.38 MB from 131 reference cycles (threshold: 10.00 MB)
+distributed.utils_perf - INFO - full garbage collection released 119.20 MB from 684 reference cycles (threshold: 10.00 MB)
+distributed.utils_perf - INFO - full garbage collection released 15.99 MB from 2351 reference cycles (threshold: 10.00 MB)
+distributed.utils_perf - INFO - full garbage collection released 15.65 MB from 1564 reference cycles (threshold: 10.00 MB)
+distributed.utils_perf - INFO - full garbage collection released 92.96 MB from 1261 reference cycles (threshold: 10.00 MB)
+distributed.utils_perf - INFO - full garbage collection released 18.93 MB from 1259 reference cycles (threshold: 10.00 MB)
+distributed.utils_perf - INFO - full garbage collection released 11.43 MB from 969 reference cycles (threshold: 10.00 MB)
+distributed.utils_perf - INFO - full garbage collection released 169.71 MB from 889 reference cycles (threshold: 10.00 MB)
+distributed.utils_perf - INFO - full garbage collection released 154.90 MB from 862 reference cycles (threshold: 10.00 MB)
+distributed.utils_perf - INFO - full garbage collection released 141.32 MB from 924 reference cycles (threshold: 10.00 MB)
+distributed.utils_perf - INFO - full garbage collection released 173.52 MB from 2050 reference cycles (threshold: 10.00 MB)
+distributed.utils_perf - INFO - full garbage collection released 54.27 MB from 2374 reference cycles (threshold: 10.00 MB)
+distributed.utils_perf - INFO - full garbage collection released 30.34 MB from 2296 reference cycles (threshold: 10.00 MB)
+distributed.utils_perf - INFO - full garbage collection released 44.38 MB from 1540 reference cycles (threshold: 10.00 MB)
+distributed.utils_perf - INFO - full garbage collection released 138.86 MB from 2124 reference cycles (threshold: 10.00 MB)
+distributed.utils_perf - INFO - full garbage collection released 10.89 MB from 1389 reference cycles (threshold: 10.00 MB)
+distributed.utils_perf - INFO - full garbage collection released 56.82 MB from 1282 reference cycles (threshold: 10.00 MB)
+slurmstepd-midway2-0068: error: *** JOB 3530239 ON midway2-0068 CANCELLED AT 2020-08-17T12:03:27 ***
+slurmstepd-midway2-0107: error: *** JOB 3530244 ON midway2-0107 CANCELLED AT 2020-08-17T12:03:27 ***
+slurmstepd-midway2-0107: error: *** JOB 3530243 ON midway2-0107 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0098: error: *** JOB 3530241 ON midway2-0098 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0252: error: *** JOB 3530248 ON midway2-0252 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0105: error: *** JOB 3530242 ON midway2-0105 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0380: error: *** JOB 3530240 ON midway2-0380 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0038: error: *** JOB 3530238 ON midway2-0038 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0125: error: *** JOB 3530246 ON midway2-0125 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0125: error: *** JOB 3530245 ON midway2-0125 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0154: error: *** JOB 3530247 ON midway2-0154 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0046: error: *** JOB 3530251 ON midway2-0046 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0262: error: *** JOB 3530250 ON midway2-0262 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0252: error: *** JOB 3530249 ON midway2-0252 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0062: error: *** JOB 3530253 ON midway2-0062 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0062: error: *** JOB 3530252 ON midway2-0062 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0109: error: *** JOB 3530254 ON midway2-0109 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0109: error: *** JOB 3530255 ON midway2-0109 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0284: error: *** JOB 3530260 ON midway2-0284 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0190: error: *** JOB 3530259 ON midway2-0190 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0284: error: *** JOB 3530261 ON midway2-0284 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0152: error: *** JOB 3530256 ON midway2-0152 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0190: error: *** JOB 3530258 ON midway2-0190 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0152: error: *** JOB 3530257 ON midway2-0152 CANCELLED AT 2020-08-17T12:03:28 ***
+slurmstepd-midway2-0330: error: *** JOB 3530262 ON midway2-0330 CANCELLED AT 2020-08-17T12:03:28 ***

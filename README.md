@@ -1,38 +1,46 @@
-# ERA-5 Reanalysis Product retriever
+# Jetstream - A replication library for the paper [insert paper name here]
+
+This library contain the replication code for the paper **[paper name here]**.
+Data adquisition, processing, and methods are included here. You can download 
+either model or reanalysis data and calculate: `t_ref` and `t_prime`, and also
+generate some derivative products, like anomalies and Hovmuller plots to explore
+the movement of wind masees in the Northern Hemisphere
+
+## Data adquisition
 
 The `reanalysis_getter` is a wrapper of the [CDS API][1]. The package is still
 in a _bare bones_ stage, but it is able to translate multiple requests to the
 CDS API and retrieve the desired data, either waiting in the CDS user queue, or
 downloading the data directly (after waiting for the data to be processed). 
 
-## Configuration and How-to Install
-
-### Conda (not totally working :confused:) 
-
-<p align="center"> 
-We use conda to have an easy install of all GRIB-compatible libraries. If you
-are downloading data only, you only need a few libraries. Right now, the status
-of this environment is not stable. 
-</p>
-
-A `environment.yml` file is added to the repo to generate the development
-environment. You can install [Miniconda][3] and run `conda env create -f
-environment.yml`. After that, you can activate the environment and start using
-the `conda activate reanalysis_env`. 
-
-### PyPI (with some additional binaries)
-
-You can install the required libraries using pip: `pip install -r
-requirements.txt`. This alternative is  OS-agnostic, but you have to install
-some binaries to make some libraries work (I'm talking about you [cfgib][4]).
-You can follow the instructions [here][4]. Also, be aware that [Iris][5] has to
-be manually installed. 
-
 ### API Credentials
 
 Following the API configuration, a `~/.cdsapirc` file with API credentials must
 be created before doing any request. See the API [documentation][2] for more
 details on how to get your user credentials.
+
+## Data processing
+
+We run our tests on two types of products: `reanalysis` (ERA-5), and several CIMP6
+global climate models `model`. To process both, the user can use `jetstream.model.Analysis`
+or `jetstream.model.Model` to either process reanalysis data or GCM data. Both classes
+are abstract classes inherited from `jetstream.model.template` and adapted to capture 
+all the particularities from each data set. 
+
+This project is heavily reliant on both Dask and `xarray`, and uses the parallel powers 
+from the latter to take big datasets and process the outlined methods in our paper.
+Hence, there are some hardware requirements that are needed to fully replicate our methods
+on a complete product, especially with daily data. 
+
+Both classes are able to take a `dask.distributed.Client` object from the environment and
+start calculation using the powers of embarassing distributed computing, onn both local and
+remote environments. 
+
+## Configuration and How-to Install
+
+You can use: `python setup.py install --user` to install the modules of this library.
+We recoment you to use a `virtualenv` to avoid conflicts with your local libraries, or
+use any of the Dask Docker images. 
 
 # Use case
 
@@ -55,14 +63,6 @@ Data will be requested and a queue will start. Once data is processed remotely,
 the download process will start. By default, data will be stored in the
 `cdsapi_requested_files` directory. 
 
-
-## TODO
-
- - [x] Run with the CDS API.
- - [ ] Add SQLite for storing requested data (API has no way to check data from
-   Python]
- - [ ] Integrate with `xarray` and `iris` to extract data to n-arrays. 
- - [ ] Integrate to Luigi/Airflow (?) pipeline 
 
 [1]: https://cds.climate.copernicus.eu/cdsapp#!/home
 [2]: https://cds.climate.copernicus.eu/api-how-to
