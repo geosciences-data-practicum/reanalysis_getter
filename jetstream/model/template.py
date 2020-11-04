@@ -398,8 +398,8 @@ class Template(ABC):
         return xarr
 
     def build_save_dirs(self):
-        if self.path_to_save_files is not None:
-            product_dir = os.path.join(self.path_to_save_files,
+        if self.path_to_save is not None:
+            product_dir = os.path.join(self.path_to_save,
                                        self.product)
             if not os.path.exists(product_dir):
                 os.mkdir(product_dir)

@@ -35,4 +35,6 @@ fi
 echo "Launching model in workers"
 $PYTHON_PATH runner.py --product_path $PATH_TO_RAW_MODEL \
 	    --save_path $PATH_TO_SAVE \
+	    --start_year 2095 \
+	    --end_year 2100 \
 	    --time_step 5

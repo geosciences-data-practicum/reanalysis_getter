@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name=dask-jetstream
-#SBATCH --account=geos39650
+#SBATCH --account=pi-moyer
 #SBATCH --nodes=1
 #SBATCH --exclusive
 #SBATCH --time=04:00:00
