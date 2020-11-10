@@ -22,7 +22,7 @@ class Template(ABC):
      Different data classes can be adapted using this class as a template. 
     """
 
-    chunks = {'time': 1}
+    chunks = {'time': 5}
     DIMS = ['time', 'lat', 'lon']
     R_EARTH = 6367.47
 
@@ -31,11 +31,15 @@ class Template(ABC):
                  subset_dict=None,
                  path_to_save_files=None,
                  temp_interval_size=2,
+                 season=None,
+                 rescale_longitude=False,
                  var='t2m'):
         self.path_to_files = path_to_files
         self.path_to_save = path_to_save_files
         self.temp_interval_size = temp_interval_size
         self.var = var
+        self.season = season
+        self.rescale_longitude = rescale_longitude
         self.subset_dict=subset_dict
         self.outvars=['t_ref', 't_prime', self.temp_var]
 
@@ -83,10 +87,20 @@ class Template(ABC):
                 'longitude': 'lon',
             })
 
-
         if self.subset_dict is not None:
             xr_data = self.cut(xr_data)
-            print('Cut data')
+            print(f'Cutting data using {self.subset_data}')
+
+        if self.season is not None:
+            xr_data = xr_data.where(
+                xr_data.time.dt.season == self.season,
+                drop=True
+            )
+
+        if self.rescale_longitude is True:
+            xr_data = xr_data.assign_coords(
+                lon=(((xr_data.lon + 180) % 360) - 180)
+            ).sortby('lon')
 
         return xr_data
 
@@ -149,10 +163,9 @@ class Template(ABC):
             DLAMBDA
         )
 
-    @property
+    @cachedproperty
     def grid_area_df(self):
-        """
-        Cumulative area calculation per temperature bin and date
+        """ Cumulative area calculation per temperature bin and date
 
         This functions takes a dask.DataFrame and calculates the cumulative area
         per temperature bin, defined by the cut_interval option, and grouped by
@@ -189,8 +202,7 @@ class Template(ABC):
         return dd_data_group_time
 
     def _distributions_lat_eff(self, cdf_areas):
-        """
-        Calculate cumulative distribution of effective latitudes (phi-effective)
+        """ Calculate cumulative distribution of effective latitudes (phi-effective)
 
         This is an intermediate step to calculate both Tref and T_prime.
 
@@ -202,12 +214,55 @@ class Template(ABC):
         temperature bucket. 
         """
 
-        client = _get_global_client()
-
         pdf_lat_effs = np.pi/2.-np.arccos(1-cdf_areas / (2*np.pi*self.R_EARTH**2))
         pdf_lat_effs_deg = np.rad2deg(pdf_lat_effs)
 
         return pdf_lat_effs
+
+    def eff_lat_dist(self,
+                     latitude,
+                     longitude,
+                     season='DJF'):
+        """ Calculate distributions of effective altitude for a desired
+        location
+        """
+
+        # Calculate effective latitudes by using the temperature area weights
+        area_weights = self.grid_area_df.reset_index(drop=False)
+        area_weights['cdf_eff_lat_mapping'] = area_weights.groupby('time').\
+        area_grid.apply(lambda x: self._distributions_lat_eff(x))
+
+        #area_weights = area_weights[ ~ area_weights.cdf_eff_lat_mapping.isna()]
+        area_weights['temp_bracket'] = area_weights.temp_bracket.apply(
+            lambda x: x.left.astype(float)).astype(float)
+        area_weights['eff_lat_deg'] = np.rad2deg(area_weights.cdf_eff_lat_mapping)
+
+        # Subset data array and invert
+        xr_subset = self.data_array.sel(lon=longitude,
+                                       lat=latitude,
+                                       method='nearest')
+        xr_subset_winter = xr_subset.where(
+            xr_subset.time.dt.season == season
+        )
+        xr_subset_df = xr_subset_winter.to_dask_dataframe()
+
+        # Calculate the temperature brackets and join
+        t_max, t_min = dask.compute(self.data_array_dask_df[self.temp_var].max(), 
+                                    self.data_array_dask_df[self.temp_var].min())
+        range_cuts = np.arange(t_min, t_max , self.temp_interval_size)
+        xr_subset_df['temp_bracket'] = xr_subset_df[self.temp_var].map_partitions(
+            pd.cut, range_cuts
+        )
+
+        xr_subset_df['temp_bracket'] =  xr_subset_df.temp_bracket.apply(
+            lambda x: x.left.astype(float)
+        ).astype(float)
+
+        # Merge both tables
+        merge = xr_subset_df.merge(area_weights,
+                                   on=['time', 'temp_bracket']
+                                   )
+        return merge
 
     def _temp_ref(self,
                   ddf,

@@ -35,6 +35,17 @@ class Model(Template):
             xr_data = self.cut(xr_data)
             print('Cut data')
 
+        if self.season is not None:
+            xr_data = xr_data.where(
+                xr_data.time.dt.season == self.season,
+                drop=True
+            )
+
+        if self.rescale_longitude is True:
+            xr_data = xr_data.assign_coords(
+                lon=(((xr_data.lon + 180) % 360) - 180)
+            ).sortby('lon')
+
         return xr_data[self.DIMS + [self.temp_var]].squeeze()
 
     def cut(self, array_obj):
