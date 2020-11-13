@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 setup(
     name='jetstream',
-    version='0.0.1',
+    version='0.0.2',
     author=['Ivan Higuera-Mendieta',
             'Amanda Farah',
             'Yuqi Song',
@@ -10,5 +10,5 @@ setup(
     description='Python library for paper results replication',
     include_package_data=True,
     url="",
-    packages= find_packages(),
+    packages= find_packages(include=['jetstream']),
 )

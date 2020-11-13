@@ -9,7 +9,8 @@ import bottleneck as bn
 from dask.diagnostics import ProgressBar
 from descriptors import cachedproperty
 from distributed.client import _get_global_client
-from abc import ABC, abstractmethod 
+from abc import ABC, abstractmethod
+
 
 class Template(ABC):
     """ Abstract class to process and calculate metrics in climate data products
@@ -31,22 +32,25 @@ class Template(ABC):
                  subset_dict=None,
                  path_to_save_files=None,
                  temp_interval_size=2,
+                 season=None,
+                 rescale_longitude=False,
                  var='t2m'):
         self.path_to_files = path_to_files
         self.path_to_save = path_to_save_files
         self.temp_interval_size = temp_interval_size
         self.var = var
-        self.subset_dict=subset_dict
-        self.outvars=['t_ref', 't_prime', self.temp_var]
+        self.season = season
+        self.rescale_longitude = rescale_longitude
+        self.subset_dict = subset_dict
+        self.outvars = ['t_ref', 't_prime', self.temp_var]
 
         if isinstance(self.path_to_files, pathlib.Path):
             self.product = self.path_to_files.stem
         else:
             self.product = pathlib.Path(self.path_to_files).stem
 
-
     def __repr__(self):
-       return f'''
+        return f'''
                Climate product: {self.product} \n
                Grid size: ({self.lat_grid_size}, {self.lon_grid_size})
                '''
@@ -55,10 +59,9 @@ class Template(ABC):
     def pipeline_methods(self):
 
         dir = self.build_save_dirs()
-        xr_obj = self.dask_data_to_xarray(
-            df=self.t_prime_calculation)
+        xr_obj = self.dask_data_to_xarray(df=self.t_prime_calculation)
 
-        if self.subset_dict is not None: 
+        if self.subset_dict is not None:
             time_slice = self.subset_dict['time']
             filename = f'{self.product}_output_{time_slice.start}_{time_slice.stop}.nc4'
         else:
@@ -72,10 +75,9 @@ class Template(ABC):
         """ Lazy load model/analysis data into memory. 
         """
 
-        client = _get_global_client()
         xr_data = xr.open_mfdataset(self.path_to_files,
-                                 chunks=self.chunks,
-                                 parallel=True)
+                                    chunks=self.chunks,
+                                    parallel=True)
 
         if not all(x in list(xr_data.coords) for x in self.DIMS):
             xr_data = xr_data.rename({
@@ -83,10 +85,17 @@ class Template(ABC):
                 'longitude': 'lon',
             })
 
-
         if self.subset_dict is not None:
             xr_data = self.cut(xr_data)
-            print('Cut data')
+            print(f'Cutting data using {self.subset_data}')
+
+        if self.season is not None:
+            xr_data = xr_data.where(xr_data.time.dt.season == self.season,
+                                    drop=True)
+
+        if self.rescale_longitude is True:
+            xr_data = xr_data.assign_coords(lon=(((xr_data.lon + 180) % 360) -
+                                                 180)).sortby('lon')
 
         return xr_data
 
@@ -139,20 +148,15 @@ class Template(ABC):
 
         Returns: Area per grid
         """
-        DPHI = self.lat_grid_size*np.pi/180.0
-        DLAMBDA=self.lon_grid_size*np.pi/180.0
+        DPHI = self.lat_grid_size * np.pi / 180.0
+        DLAMBDA = self.lon_grid_size * np.pi / 180.0
 
-        return (
-            (self.R_EARTH)**2 *
-            np.cos(np.deg2rad(latitude)) *
-            DPHI *
-            DLAMBDA
-        )
+        return ((self.R_EARTH)**2 * np.cos(np.deg2rad(latitude)) * DPHI *
+                DLAMBDA)
 
-    @property
+    @cachedproperty
     def grid_area_df(self):
-        """
-        Cumulative area calculation per temperature bin and date
+        """ Cumulative area calculation per temperature bin and date
 
         This functions takes a dask.DataFrame and calculates the cumulative area
         per temperature bin, defined by the cut_interval option, and grouped by
@@ -163,17 +167,15 @@ class Template(ABC):
 
         df = self.data_array_dask_df.copy()
         df['area_grid'] = df.lat.map_partitions(
-            self._calculate_area_from_latitude
-        )
+            self._calculate_area_from_latitude)
 
         if not 'temp_brakets' in df.columns:
-            t_max, t_min = dask.compute(df[self.temp_var].max(), 
+            t_max, t_min = dask.compute(df[self.temp_var].max(),
                                         df[self.temp_var].min())
-            range_cuts = np.arange(t_min, t_max , self.temp_interval_size)
+            range_cuts = np.arange(t_min, t_max, self.temp_interval_size)
 
             df['temp_bracket'] = df[self.temp_var].map_partitions(
-                pd.cut, range_cuts
-            )
+                pd.cut, range_cuts)
 
         dd_data_group = df.groupby(['temp_bracket', 'time'])
 
@@ -189,8 +191,7 @@ class Template(ABC):
         return dd_data_group_time
 
     def _distributions_lat_eff(self, cdf_areas):
-        """
-        Calculate cumulative distribution of effective latitudes (phi-effective)
+        """ Calculate cumulative distribution of effective latitudes (phi-effective)
 
         This is an intermediate step to calculate both Tref and T_prime.
 
@@ -202,18 +203,51 @@ class Template(ABC):
         temperature bucket. 
         """
 
-        client = _get_global_client()
-
-        pdf_lat_effs = np.pi/2.-np.arccos(1-cdf_areas / (2*np.pi*self.R_EARTH**2))
+        pdf_lat_effs = np.pi / 2. - np.arccos(1 - cdf_areas /
+                                              (2 * np.pi * self.R_EARTH**2))
         pdf_lat_effs_deg = np.rad2deg(pdf_lat_effs)
 
         return pdf_lat_effs
 
-    def _temp_ref(self,
-                  ddf,
-                  area_weights,
-                  temp_binedges,
-                  cdf_lat_effs):
+    def eff_lat_dist(self, latitude, longitude, season='DJF'):
+        """ Calculate distributions of effective altitude for a desired
+        location
+        """
+
+        # Calculate effective latitudes by using the temperature area weights
+        area_weights = self.grid_area_df.reset_index(drop=False)
+        area_weights['cdf_eff_lat_mapping'] = area_weights.groupby('time').\
+        area_grid.apply(lambda x: self._distributions_lat_eff(x))
+
+        #area_weights = area_weights[ ~ area_weights.cdf_eff_lat_mapping.isna()]
+        area_weights['temp_bracket'] = area_weights.temp_bracket.apply(
+            lambda x: x.left.astype(float)).astype(float)
+        area_weights['eff_lat_deg'] = np.rad2deg(
+            area_weights.cdf_eff_lat_mapping)
+
+        # Subset data array and invert
+        xr_subset = self.data_array.sel(lon=longitude,
+                                        lat=latitude,
+                                        method='nearest')
+        xr_subset_winter = xr_subset.where(xr_subset.time.dt.season == season)
+        xr_subset_df = xr_subset_winter.to_dask_dataframe()
+
+        # Calculate the temperature brackets and join
+        t_max, t_min = dask.compute(
+            self.data_array_dask_df[self.temp_var].max(),
+            self.data_array_dask_df[self.temp_var].min())
+        range_cuts = np.arange(t_min, t_max, self.temp_interval_size)
+        xr_subset_df['temp_bracket'] = xr_subset_df[
+            self.temp_var].map_partitions(pd.cut, range_cuts)
+
+        xr_subset_df['temp_bracket'] = xr_subset_df.temp_bracket.apply(
+            lambda x: x.left.astype(float)).astype(float)
+
+        # Merge both tables
+        merge = xr_subset_df.merge(area_weights, on=['time', 'temp_bracket'])
+        return merge
+
+    def _temp_ref(self, ddf, area_weights, temp_binedges, cdf_lat_effs):
         """
         Latitudinal reference temperature to capture the gradient effect of the
         jet-stream (t_ref) 
@@ -240,10 +274,8 @@ class Template(ABC):
         areas_time = area_weights[area_weights['time'] == unique_time]
 
         # Interpolate to calculate the t_ref latitde mapping
-        t_ref = np.interp(ddf.lat.unique(),
-                          np.flip(areas_time[cdf_lat_effs]),
-                          np.flip(areas_time[temp_binedges])
-                          )
+        t_ref = np.interp(ddf.lat.unique(), np.flip(areas_time[cdf_lat_effs]),
+                          np.flip(areas_time[temp_binedges]))
 
         t_ref_df = pd.DataFrame({
             't_ref': t_ref,
@@ -254,7 +286,7 @@ class Template(ABC):
         return t_ref_df
 
     @cachedproperty
-    def t_prime_calculation(self): 
+    def t_prime_calculation(self):
         """ Jet-stream metric
 
         return: A delayed dask.DataFrame with the t-prime, t-ref. 
@@ -262,8 +294,10 @@ class Template(ABC):
 
         client = _get_global_client()
 
-        meta = pd.DataFrame([], columns=["t_ref", 'time', 'lat'],
-                            index=pd.Index([], name="time"), dtype=str)
+        meta = pd.DataFrame([],
+                            columns=["t_ref", 'time', 'lat'],
+                            index=pd.Index([], name="time"),
+                            dtype=str)
 
         # Calculate effective latitudes by using the temperature area weights
         area_weights = self.grid_area_df.reset_index(drop=False)
@@ -273,27 +307,28 @@ class Template(ABC):
         #area_weights = area_weights[ ~ area_weights.cdf_eff_lat_mapping.isna()]
         area_weights['temp_bracket'] = area_weights.temp_bracket.apply(
             lambda x: x.left.astype(float)).astype(float)
-        area_weights['eff_lat_deg'] = np.rad2deg(area_weights.cdf_eff_lat_mapping)
+        area_weights['eff_lat_deg'] = np.rad2deg(
+            area_weights.cdf_eff_lat_mapping)
 
         # Merge and calculate t_ref by time partition
         # Note: dask arrays need metadata on the returning object
-        t_ref_lazy = self.data_array_dask_df.groupby(['time']).apply(self._temp_ref,
-                                                  area_weights=area_weights,
-                                                  temp_binedges='temp_bracket',
-                                                  cdf_lat_effs='eff_lat_deg',
-                                                  meta=meta
-                                                  )
+        t_ref_lazy = self.data_array_dask_df.groupby(['time']).apply(
+            self._temp_ref,
+            area_weights=area_weights,
+            temp_binedges='temp_bracket',
+            cdf_lat_effs='eff_lat_deg',
+            meta=meta)
 
         # Calculate t_refs and then merge with raw data
         with ProgressBar():
             t_ref = t_ref_lazy.compute()
 
         t_ref_df_noidx = t_ref.reset_index(drop=True)
-        merge_data = self.data_array_dask_df.merge(t_ref_df_noidx, 
+        merge_data = self.data_array_dask_df.merge(t_ref_df_noidx,
                                                    on=['time', 'lat'],
                                                    how='inner')
         merge_data['t_prime'] = merge_data[self.temp_var] - merge_data['t_ref']
-        merge_data =  client.persist(merge_data)
+        merge_data = client.persist(merge_data)
 
         return merge_data
 
@@ -308,10 +343,8 @@ class Template(ABC):
         """
 
         if xr_obj is None:
-            xr_obj =  self.dask_data_to_xarray(
-                df=self.t_prime_calculation,
-                var='t_prime'
-            )
+            xr_obj = self.dask_data_to_xarray(df=self.t_prime_calculation,
+                                              var='t_prime')
 
         xr_mean = xr_obj.\
             groupby('time.dayofyear').\
@@ -350,14 +383,12 @@ class Template(ABC):
             return df
 
         xr_ddf = xarr.to_dask_dataframe()[['lat', 'lon', 'time', 't_prime']]
-        xr_ddf = xr_ddf.groupby(['lat', 'lon']).apply(moving_average, meta=meta).compute()
- 
+        xr_ddf = xr_ddf.groupby(['lat', 'lon']).apply(moving_average,
+                                                      meta=meta).compute()
 
         return xr_ddf
 
-    def dask_data_to_xarray(self,
-                            df,
-                            var=None):
+    def dask_data_to_xarray(self, df, var=None):
         """
         Transform delayed dask.DataFrame to xarray object
 
@@ -371,8 +402,8 @@ class Template(ABC):
         Return: xarray Dataset
         """
 
-        shape = tuple([len(self.t_prime_calculation[dim].unique()) for dim in
-                       self.DIMS])
+        shape = tuple(
+            [len(self.t_prime_calculation[dim].unique()) for dim in self.DIMS])
 
         if var is not None:
             extract_vars = [var]
@@ -387,23 +418,20 @@ class Template(ABC):
             tuple_data = (self.DIMS, var_array_reshape)
             values_arrays.append(tuple_data)
 
-        dims_values = [self.t_prime_calculation[dim].unique() for dim in self.DIMS]
+        dims_values = [
+            self.t_prime_calculation[dim].unique() for dim in self.DIMS
+        ]
         coords_dict = dict(zip(self.DIMS, dims_values))
         values_dicts = dict(zip(self.outvars, values_arrays))
 
-        xarr = xr.Dataset(values_dicts,
-                          coords=coords_dict
-                          )
+        xarr = xr.Dataset(values_dicts, coords=coords_dict)
 
         return xarr
 
     def build_save_dirs(self):
-        if self.path_to_save_files is not None:
-            product_dir = os.path.join(self.path_to_save_files,
-                                       self.product)
+        if self.path_to_save is not None:
+            product_dir = os.path.join(self.path_to_save, self.product)
             if not os.path.exists(product_dir):
                 os.mkdir(product_dir)
 
         return product_dir
-
-

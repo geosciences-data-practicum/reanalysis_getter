@@ -4,6 +4,7 @@ from descriptors import cachedproperty
 from distributed.client import _get_global_client
 from jetstream.model.template import Template
 
+
 class Model(Template):
     """ Methods template for GCM
     """
@@ -18,8 +19,8 @@ class Model(Template):
         client = _get_global_client()
 
         xr_data = xr.open_mfdataset(self.path_to_files,
-                                 chunks=self.chunks,
-                                 parallel=True)
+                                    chunks=self.chunks,
+                                    parallel=True)
 
         if not all(x in list(xr_data.coords) for x in self.DIMS):
             xr_data = xr_data.rename({
@@ -34,6 +35,14 @@ class Model(Template):
         if self.subset_dict is not None:
             xr_data = self.cut(xr_data)
             print('Cut data')
+
+        if self.season is not None:
+            xr_data = xr_data.where(xr_data.time.dt.season == self.season,
+                                    drop=True)
+
+        if self.rescale_longitude is True:
+            xr_data = xr_data.assign_coords(lon=(((xr_data.lon + 180) % 360) -
+                                                 180)).sortby('lon')
 
         return xr_data[self.DIMS + [self.temp_var]].squeeze()
 
@@ -50,15 +59,19 @@ class Model(Template):
         """
 
         valid_keys = {
-            key: self.subset_dict[key] for key in self.subset_dict
-            if key in array_obj.coords
+            key: self.subset_dict[key]
+            for key in self.subset_dict if key in array_obj.coords
         }
 
-        other_coords = [x for x in list(array_obj.coords) if x not in self.DIMS]
+        other_coords = [
+            x for x in list(array_obj.coords) if x not in self.DIMS
+        ]
 
-        xr_data = array_obj.sel(valid_keys)
-        xr_data = xr_data.drop(other_coords)
+        xr_data = array_obj.drop(other_coords)
+
+        if 'lat' in valid_keys.keys():
+            xr_data = xr_data.where(xr_data.lat > valid_keys['lat'], drop=True)
+        if 'lon' in valid_keys.keys():
+            xr_data = xr_data.where(xr_data.lat > valid_keys['lat'], drop=True)
 
         return xr_data.squeeze()
-
-
