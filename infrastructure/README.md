@@ -49,7 +49,7 @@ script `launch-dask.sh` orchestrates the creration of the scheduler, and a
 user-defined number of workers: 
 
 ```bash
-./launh-dask.sh <path_to_climate_model> <path_to_save_folder> <number-of-workers>
+./launch-dask.sh <path_to_climate_model> <path_to_save_folder> <number-of-workers>
 ```
 
 This will spawn one job per worker, but additionally, a job that runs the
