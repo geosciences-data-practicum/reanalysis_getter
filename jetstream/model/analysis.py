@@ -20,7 +20,12 @@ class Analysis(Template):
             if key in array_obj.coords
         }
 
-        xr_data = array_obj.sel(valid_keys)
+        xr_data = array_obj.sel(time=valid_keys['time'])
+
+        if 'lat' in valid_keys.keys():
+            xr_data = xr_data.where(array_obj.lat > valid_keys['lat'], drop=True)
+        if 'lon' in valid_keys.keys():
+            xr_data = xr_data.where(array_obj.lat > valid_keys['lat'], drop=True)
 
         return xr_data.squeeze()
 
