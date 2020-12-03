@@ -11,8 +11,9 @@ from scipy.stats import skew
 from matplotlib.colors import LogNorm
 import joypy
 import cartopy.crs as ccrs
+from cached_property import cached_property
 
-class PostProcessor(object):
+class SingleModelPostProcessor(object):
     
     def __init__(self,
                  path_to_files,
@@ -23,16 +24,6 @@ class PostProcessor(object):
         self.path_to_save = path_to_save_files
         self.season = season
         self.var = diagnostic_var
-        self.dataset = xr.open_mfdataset(self.path_to_files, combine='by_coords')
-        if season == 'DJF':
-           if 'era5' in 'path_to_files':
-               self.dataset = self.sel_winters(1980,2018)
-           else:
-               self.dataset=self.sel_winters()
-        elif season == 'all':
-           pass # self.dataset = self.dataset
-        else:
-            raise NotImplementedError
 
     def sel_winters(self,start_year=2015,end_year=2099):
         winters = pd.date_range('%i-12-01'%start_year,'%i-02-28'%(start_year+1),freq='D')
@@ -43,6 +34,22 @@ class PostProcessor(object):
          
         selected = self.dataset.sel(time=winters)
         return selected
+
+    @cached_property
+    def dataset(self):
+        self.dataset = xr.open_mfdataset(self.path_to_files,
+                                         chunks={'time': 1},
+                                         combine='by_coords')
+        if self.season == 'DJF':
+           if 'era5' in 'path_to_files':
+               self.dataset = self.sel_winters(1980,2018)
+           else:
+               self.dataset=self.sel_winters()
+        elif season == 'all':
+           pass # self.dataset = self.dataset
+        else:
+            raise NotImplementedError
+
 
     @staticmethod
     def demean(data):
@@ -75,8 +82,12 @@ class PostProcessor(object):
         self.data_future = self.dataset.sel(time=time_slice_future)#self.sel_winters(2089,2099)
     
         if demean:
-           data_present_dm = self.demean(self.data_present)
-           data_future_dm = self.demean(self.data_future)
+           try:
+               data_present_dm = self.data_present_dm 
+               data_future_dm = self.data_future_dm
+           except AttributeError:
+               data_present_dm = self.demean(self.data_present)
+               data_future_dm = self.demean(self.data_future)
            self.stats_present = self.stats_calc(data_present_dm)
            self.stats_future = self.stats_calc(data_future_dm)
            self.stats_diff =  self.stats_future - self.stats_present
