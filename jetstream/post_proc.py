@@ -37,7 +37,14 @@ class SingleModelPostProcessor(object):
 
     @cached_property
     def dataset(self):
-        self.dataset = xr.open_mfdataset(self.path_to_files,
+        if self.var == 'eff_lat':
+
+            self.dataset = xr.open_mfdataset(self.path_to_files,
+                                        combine='by_coords',
+                                        chunks={'time': 1},
+                                        preprocess=self.preprocess_file)
+        else:
+            self.dataset = xr.open_mfdataset(self.path_to_files,
                                          chunks={'time': 1},
                                          combine='by_coords')
         if self.season == 'DJF':
@@ -55,6 +62,12 @@ class SingleModelPostProcessor(object):
         else:
             raise NotImplementedError
 
+    @staticmethod
+    def preprocess_file(array):
+        var = list(array.variables.keys())[-1]
+        array_new = array.rename({var: 'eff_lat'})
+        array_new = array_new.sortby('time')
+        return array_new
 
     @staticmethod
     def demean(data):
