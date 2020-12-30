@@ -70,12 +70,18 @@ class SingleModelPostProcessor(object):
         return array_new
 
     @staticmethod
-    def demean(data):
+    def demean(data,decade=False):
+        if decade:
+            decade_day_idx = pd.MultiIndex.from_arrays([(data.time.dt.year//10)*10, data.time.dt.dayofyear])
+            data.coords['decade_day'] = ('time', decade_day_idx)
+            grp_by = 'decade_day'
+        else:
+            grp_by = 'time.dayofyear'
         xr_mean = data.\
-                groupby('time.dayofyear').\
+                groupby(grp_by).\
                 mean().\
                 compute()
-        demeaned = data.groupby('time.dayofyear') - xr_mean
+        demeaned = data.groupby(grp_by) - xr_mean
         return demeaned.compute()
     def stats_calc(self,data):
         mean = data.mean(dim='time')#.rename({'t_prime':'tp_mean'})
@@ -138,8 +144,8 @@ class SingleModelPostProcessor(object):
              ax.gridlines()
          plt.savefig(self.path_to_save+'diagnostic_skew.png')
   
-  
-  
-  
-  
+      def output_temp_anomalies(self):
+          
+      
+      
   
