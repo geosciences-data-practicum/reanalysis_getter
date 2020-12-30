@@ -105,6 +105,7 @@ class SingleModelPostProcessor(object):
             grp_by = 'decade_day'
         else:
             grp_by = 'time.dayofyear'
+
         xr_mean = (data.
                    groupby(grp_by).
                    mean()
