@@ -1,6 +1,7 @@
 """
 Post-processing analysis on T_ref and phi_eff to produce pretty plots for diagnostic and publication purposes.
 """
+
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,15 +13,21 @@ from matplotlib.colors import LogNorm
 import joypy
 os.environ['PROJ_LIB'] = '/home/afarah/.conda/envs/jetstream/share/proj/'
 import cartopy.crs as ccrs
-from cached_property import cached_property
+from descriptors import cachedproperty
+from distributed.client import _get_global_client
 
 class SingleModelPostProcessor(object):
-    
+    """ Post-processing routines for analysis of climate models and reanalysis
+    with T-prime, effective latitude and surface temperature data
+    """
+
     def __init__(self,
                  path_to_files,
+                 chunks={'time': 1},
                  path_to_save_files=None,
                  diagnostic_var='t_prime',
                  season='DJF'):
+        self.chunks = chunks 
         self.path_to_files = path_to_files
         self.path_to_save = path_to_save_files
         self.season = season
@@ -35,17 +42,22 @@ class SingleModelPostProcessor(object):
         selected = self.dataset.sel(time=winters)
         return selected
 
-    @cached_property
+    @cachedproperty
     def dataset(self):
+
+        client = _get_global_client()
+        if client is None:
+            print(f'WARNING! No Dask client available in environment!')
+
         if self.var == 'eff_lat':
 
             self.dataset = xr.open_mfdataset(self.path_to_files,
                                         combine='by_coords',
-                                        chunks={'time': 1},
+                                        chunks=self.chunks,
                                         preprocess=self.preprocess_file)
         else:
             self.dataset = xr.open_mfdataset(self.path_to_files,
-                                         chunks={'time': 1},
+                                         chunks=self.chunks,
                                          combine='by_coords')
         if self.season == 'DJF':
            if 'era5' in self.path_to_files:
@@ -70,13 +82,55 @@ class SingleModelPostProcessor(object):
         return array_new
 
     @staticmethod
-    def demean(data):
-        xr_mean = data.\
-                groupby('time.dayofyear').\
-                mean().\
-                compute()
-        demeaned = data.groupby('time.dayofyear') - xr_mean
-        return demeaned.compute()
+    def demean(data, decade=False):
+        """ Calculate demeaned anomaly with daily and decadal baselines
+
+        This function calculates the demeaded temperature by either calculating
+        a day-of-the-year baseline mean, by default, or by calculating a decade mean.
+        This operation is grid-based, so it is calculating daily and decade
+        means. 
+
+        Parameters
+        ---------
+            - decade bool: Demean by decades. Default is `False`.
+
+        Returns
+        ------
+            xr.Dataset
+        """
+
+        if decade:
+            decade_day_idx = pd.MultiIndex.from_arrays([(data.time.dt.year//10)*10, data.time.dt.dayofyear])
+            data.coords['decade_day'] = ('time', decade_day_idx)
+            grp_by = 'decade_day'
+        else:
+            grp_by = 'time.dayofyear'
+        xr_mean = (data.
+                   groupby(grp_by).
+                   mean()
+                   )
+
+        demeaned = data.groupby(grp_by) - xr_mean
+
+        return demeaned
+
+    def demeaned_shift(self, ds):
+        """ Shifted demeaned effective latitude 
+
+        This function takes the demeaned effective latitude data and adds back
+        the real latitude to get an infomative measurement of effective
+        latitude instead of an anomaly. 
+
+        Returns
+        -------
+            xr.Dataset
+        """
+
+        demeaned_array = self.demean(ds)
+        demeaned_shift = demeaned_array + ds.lat
+
+        return demeaned_shift
+
     def stats_calc(self,data):
         mean = data.mean(dim='time')#.rename({'t_prime':'tp_mean'})
         std = data.std(dim='time')#.rename({'t_prime':'tp_std'})
@@ -95,7 +149,7 @@ class SingleModelPostProcessor(object):
             present = (2015,2025)
         self.data_present = self.sel_winters(present[0],present[1])
         self.data_future = self.sel_winters(future[0],future[1])
- 
+
         if demean:
            try:
                data_present_dm = self.data_present_dm 
@@ -106,7 +160,7 @@ class SingleModelPostProcessor(object):
            self.stats_present = self.stats_calc(data_present_dm)
            self.stats_future = self.stats_calc(data_future_dm)
            self.stats_diff =  self.stats_future - self.stats_present
- 
+
         else:
            self.stats_present = self.stats_calc(self.data_present)
            self.stats_future = self.stats_calc(self.data_future)
@@ -136,10 +190,4 @@ class SingleModelPostProcessor(object):
          for ax in p.axes.flat:
              ax.coastlines()
              ax.gridlines()
-         plt.savefig(self.path_to_save+'diagnostic_skew.png')
-  
-  
-  
-  
-  
-  
+         plt.savefig(os.path.join(self.path_to_save, 'diagnostic_skew.png'))
