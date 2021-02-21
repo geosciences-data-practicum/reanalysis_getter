@@ -67,6 +67,7 @@ class Model(Template):
             x for x in list(array_obj.coords) if x not in self.DIMS
         ]
 
+        xr_data = array_obj.sel(time=valid_keys['time'])
         xr_data = array_obj.drop(other_coords)
 
         if 'lat' in valid_keys.keys():

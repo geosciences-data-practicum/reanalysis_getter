@@ -11,6 +11,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from jetstream.model.model import Model
+from jetstream.model.analysis import Analysis
 from dask.distributed import Client
 
 def get_logger(log_level):
@@ -32,12 +33,14 @@ def get_logger(log_level):
 @click.option('--time_step', default=5, help='Number of years per file')
 @click.option('--start_year', default=2015, help="Start year")
 @click.option('--end_year', default=2100, help="End year")
+@click.option('--model', is_flag=True, help='Run Model instead of Analysis')
 @click.option('--log_level', default='INFO')
 def cli(product_path,
         save_path,
         time_step,
         start_year,
         end_year,
+        model,
         log_level):
     """
     Calculate all methods from paper for a specified model by years
@@ -53,7 +56,7 @@ def cli(product_path,
     - end_year: int end year. 2100 is set as default following GCM models
     - time_step: int Define a step to divide years. 5 is the default value.
 
-    Returns: 
+    Returns:
     None. Save to path directly.
     """
     logger = get_logger(log_level)
@@ -63,20 +66,37 @@ def cli(product_path,
         # Define time ranges 
         start_year = datetime(year, 12, 1).strftime('%Y-%m-%d')
         end_year = datetime(year + time_step, 3, 1).strftime('%Y-%m-%d')
-        subset_data = {'time': slice(start_year, end_year)}
+        subset_data = {'time': slice(start_year, end_year), 'lat': 20}
 
         logger.info(f"Start processing -- {start_year} to {end_year}")
-        model_object = Model(
-            path_to_files=product_path,
-            path_to_save_files=save_path,
-            subset_dict=subset_data
-        )
+
+        if model:
+            model_object = Model(
+                path_to_files=product_path,
+                path_to_save_files=save_path,
+                subset_dict=subset_data,
+                season='DJF',
+                temp_interval_size=1,
+                chunks={'time': 1},
+                rescale_longitude=True
+            )
+        else:
+            model_object = Analysis(
+                path_to_files=product_path,
+                path_to_save_files=save_path,
+                subset_dict=subset_data,
+                season='DJF',
+                temp_interval_size=1,
+                chunks={'time': 1},
+                rescale_longitude=True
+            )
 
         model_object.pipeline_methods
 
 if __name__ == '__main__':
-    path_to_scheduler = os.path.join(os.getenv('SCRATCH'),
-                                 'scheduler.json')
-    client = Client(scheduler_file=path_to_scheduler)
+    #path_to_scheduler = os.path.join(os.getenv('SCRATCH'),
+    #                             'scheduler.json')
+    #client = Client(scheduler_file=path_to_scheduler)
+    client = Client()
     cli()
 
