@@ -110,7 +110,7 @@ class Template(ABC):
         return xr_data
 
     @property
-    def data_array_dask_df(self) -> dask.dataframe.DaskDataFrame:
+    def data_array_dask_df(self):
         """ Return data array as dask DataFrame and calculate temperature bins. 
 
         Thins property will yield a dask.dataframe that contain the
@@ -141,11 +141,13 @@ class Template(ABC):
         # Calculate window operation if selected
         if self.moving_window_size is not None:
             if isinstance(self.moving_window_size, int):
-                window_array = self.data_array.\
+                window_array = (
+                    self.data_array[self.temp_var].
                     rolling(time=self.moving_window_size,
                             center=False,
                             min_periods=self.moving_window_size
                             )
+                )
             else:
                 raise NotImplementedError
 
@@ -164,7 +166,7 @@ class Template(ABC):
 
             #return unified chunks since window changed chunks
             return self.data_array.\
-                unify_chunks.\
+                unify_chunks().\
                 to_dask_dataframe(dim_order=self.DIMS)
 
         else:
@@ -278,7 +280,7 @@ class Template(ABC):
         return df_
 
     @dask.delayed
-    def _create_bucket_window(w_arr, label_time):
+    def _create_bucket_window(self, w_arr, label_time):
         ''' Lazy Build temperature buckets in a rolling xarray object
 
         Parameters:
@@ -306,19 +308,20 @@ class Template(ABC):
 
             buckets = np.digitize(w_arr.sel(time=label_str),
                                   bins=bins)
-
             buckets_w_labels = np.vectorize(bins_left_labels.get)(buckets)
             buckets_arr = xr.DataArray(buckets_w_labels,
                                        coords=[
-                                           ('lat', w_arr.lat)
+                                           ('lat', w_arr.lat),
                                            ('lon', w_arr.lon)
                                        ])
-            buckets_arr = buckets_arr.assign_coords({'time': label})
+            buckets_arr = buckets_arr.assign_coords({'time': label_time})
 
-           return buckets_arr
+        else:
+            buckets_arr = None
+
+        return buckets_arr
 
     @cachedproperty
-
     def grid_area_xr(self):
         """ Cumulative area calculation per temperature bin and date
 
@@ -416,7 +419,7 @@ class Template(ABC):
 
         t_ref_arr = xr.DataArray(t_ref,
                                  coords=[
-                                     ('time', self.data_array.time.values), 
+                                     ('time', self.grid_area_xr.time.values), 
                                      ('lat', self.data_array.lat.values)
                                  ])
 
