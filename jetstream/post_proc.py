@@ -33,13 +33,15 @@ class SingleModelPostProcessor(object):
         self.season = season
         self.var = diagnostic_var
 
-    def sel_winters(self,start_year=2015,end_year=2100):
+    def sel_winters(self,data,start_year=2015,end_year=2100):
         winters = pd.date_range('%i-12-01'%start_year,'%i-02-28'%(start_year+1),freq='D')
         for i in range(start_year+1,end_year):
             begin = i
             end = i+1
             winters=winters.union(pd.date_range('%i-12-01'%begin,'%i-02-28'%end,freq='D'))
-        selected = self.dataset.sel(time=winters)
+        print(winters[0],winters[-1])
+        print(data.time)
+        selected = data.sel(time=winters)
         return selected
 
     @cachedproperty
@@ -51,26 +53,24 @@ class SingleModelPostProcessor(object):
 
         if self.var == 'eff_lat':
 
-            self.dataset = xr.open_mfdataset(self.path_to_files,
+            _full_dataset = xr.open_mfdataset(self.path_to_files,
                                         combine='by_coords',
                                         chunks=self.chunks,
                                         preprocess=self.preprocess_file)
         else:
-            self.dataset = xr.open_mfdataset(self.path_to_files,
+            _full_dataset = xr.open_mfdataset(self.path_to_files,
                                          chunks=self.chunks,
                                          combine='by_coords')
+        self.year_range = np.unique(_full_dataset.time.dt.year)[[0,-1]]
         if self.season == 'DJF':
-           if 'era5' in self.path_to_files:
-               _dataset = self.sel_winters(1980,2018)
-           else:
-               try:
-                   self.dataset['time'] = self.dataset.indexes['time'].normalize()
-               except AttributeError:
-                   self.dataset['time'] = self.dataset.indexes['time'].to_datetimeindex().normalize()
-               _dataset=self.sel_winters()
-           return _dataset
+            try:
+               _full_dataset['time'] = _full_dataset.indexes['time'].normalize()
+            except AttributeError:
+               _full_dataset['time'] = _full_dataset.indexes['time'].to_datetimeindex().normalize()
+            _dataset=self.sel_winters(_full_dataset,*self.year_range)
+            return _dataset
         elif season == 'all':
-           pass # self.dataset = self.dataset
+           return _full_dataset
         else:
             raise NotImplementedError
 
@@ -142,14 +142,11 @@ class SingleModelPostProcessor(object):
         return xr.concat([mean,std,skewness],dim='stat').assign_coords({'stat':['mean','std','skew']})
 
     def diagnostic_stats(self,demean=False):
-        if 'era5' in self.path_to_files:
-            future = (2008,2018)
-            present = (1980,1990)
-        else:
-            future = (2090,2100)
-            present = (2015,2025)
-        self.data_present = self.sel_winters(present[0],present[1])
-        self.data_future = self.sel_winters(future[0],future[1])
+        data=self.dataset
+        present = (self.year_range[0],self.year_range[0]+10)
+        future = (self.year_range[-1]-10,self.year_range[-1])
+        self.data_present = self.sel_winters(data,*present)
+        self.data_future = self.sel_winters(data,*future)
 
         if demean:
            try:
@@ -192,3 +189,20 @@ class SingleModelPostProcessor(object):
              ax.coastlines()
              ax.gridlines()
          plt.savefig(os.path.join(self.path_to_save, 'diagnostic_skew.png'))
+
+def run(path_processed,shortname,path_postproc,var_of_interest):
+    #create class
+    single = SingleModelPostProcessor(path_to_files=path_processed,
+         path_to_save_files=path_postproc+shortname+var_of_interest,
+         diagnostic_var=var_of_interest,
+         season='DJF')
+    #demean or shift
+    if var_of_interest =='t_prime':
+        filename=path_postproc+f'{shortname}_{var_of_interest}_demeaned.nc4'
+        single.demean(single.dataset.t_prime).rename('dm_t_prime'
+                                            ).to_netcdf(filename)
+    elif var_of_interest == 'eff_lat':
+        filename=path_postproc+f'{shortname}_{var_of_interest}_demeaned_shifted.nc4'
+        single.demeaned_shift(single.dataset).rename(
+            {var_of_interest: 'phi_eq_prime'
+            }).to_netcdf(filename)
