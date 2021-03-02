@@ -27,7 +27,7 @@ class SingleModelPostProcessor(object):
                  path_to_save_files=None,
                  diagnostic_var='t_prime',
                  season='DJF'):
-        self.chunks = chunks 
+        self.chunks = chunks
         self.path_to_files = path_to_files
         self.path_to_save = path_to_save_files
         self.season = season
@@ -153,7 +153,7 @@ class SingleModelPostProcessor(object):
 
         if demean:
            try:
-               data_present_dm = self.data_present_dm 
+               data_present_dm = self.data_present_dm
                data_future_dm = self.data_future_dm
            except AttributeError:
                data_present_dm = self.demean(self.data_present)
