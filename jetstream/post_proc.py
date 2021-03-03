@@ -22,14 +22,12 @@ class SingleModelPostProcessor(object):
     """
 
     def __init__(self,
-                 path_to_files,
+                 path_to_input_files,
                  chunks={'time': 1},
-                 path_to_save_files=None,
                  diagnostic_var='t_prime',
                  season='DJF'):
         self.chunks = chunks
-        self.path_to_files = path_to_files
-        self.path_to_save = path_to_save_files
+        self.path_to_files = path_to_input_files
         self.season = season
         self.var = diagnostic_var
 
@@ -39,8 +37,6 @@ class SingleModelPostProcessor(object):
             begin = i
             end = i+1
             winters=winters.union(pd.date_range('%i-12-01'%begin,'%i-02-28'%end,freq='D'))
-        print(winters[0],winters[-1])
-        print(data.time)
         selected = data.sel(time=winters)
         return selected
 
@@ -164,7 +160,7 @@ class SingleModelPostProcessor(object):
            self.stats_future = self.stats_calc(self.data_future)
            self.stats_diff = self.stats_future - self.stats_present
 
-    def diagnostic_plot(self, demean=False):
+    def diagnostic_plot(self, demean=False, path_to_save="./"):
          self.diagnostic_stats(demean=demean)
          xr_all = xr.concat([self.stats_present,self.stats_future,self.stats_diff],dim='period').assign_coords({'period':['present','future','diff']})
          print('plotting...')
@@ -174,26 +170,25 @@ class SingleModelPostProcessor(object):
          for ax in p.axes.flat:
              ax.coastlines()
              ax.gridlines()
-         plt.savefig(self.path_to_save+'diagnostic_mean.png')
+         plt.savefig(path_to_save+'_mean.png')
          p = xr_all.sel(stat='std')[self.var].plot(transform = ccrs.PlateCarree(),
                                     col='period',
                                     subplot_kws={'projection': ccrs.Orthographic(20, 90)})
          for ax in p.axes.flat:
              ax.coastlines()
              ax.gridlines()
-         plt.savefig(self.path_to_save+'diagnostic_std.png')
+         plt.savefig(path_to_save+'_std.png')
          p = xr_all.sel(stat='skew')[self.var].plot(transform = ccrs.PlateCarree(),
                                     col='period',
                                     subplot_kws={'projection': ccrs.Orthographic(20, 90)})
          for ax in p.axes.flat:
              ax.coastlines()
              ax.gridlines()
-         plt.savefig(os.path.join(self.path_to_save, 'diagnostic_skew.png'))
+         plt.savefig(path_to_save+'_skew.png')
 
-def run(path_processed,shortname,path_postproc,var_of_interest):
+def run_demeaning(path_processed,shortname,path_postproc,var_of_interest):
     #create class
-    single = SingleModelPostProcessor(path_to_files=path_processed,
-         path_to_save_files=path_postproc+shortname+var_of_interest,
+    single = SingleModelPostProcessor(path_to_input_files=path_processed,
          diagnostic_var=var_of_interest,
          season='DJF')
     #demean or shift
@@ -206,3 +201,5 @@ def run(path_processed,shortname,path_postproc,var_of_interest):
         single.demeaned_shift(single.dataset).rename(
             {var_of_interest: 'phi_eq_prime'
             }).to_netcdf(filename)
+    return single
+
