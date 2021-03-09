@@ -47,16 +47,10 @@ class SingleModelPostProcessor(object):
         if client is None:
             print(f'WARNING! No Dask client available in environment!')
 
-        if self.var == 'eff_lat':
-
-            _full_dataset = xr.open_mfdataset(self.path_to_files,
-                                        combine='by_coords',
-                                        chunks=self.chunks,
-                                        preprocess=self.preprocess_file)
-        else:
-            _full_dataset = xr.open_mfdataset(self.path_to_files,
+        _full_dataset = xr.open_mfdataset(self.path_to_files,
                                          chunks=self.chunks,
-                                         combine='by_coords')
+                                         concat_dim='time',
+                                         preprocess=self.preprocess_mf)
         self.year_range = np.unique(_full_dataset.time.dt.year)[[0,-1]]
         if self.season == 'DJF':
             try:
@@ -71,10 +65,13 @@ class SingleModelPostProcessor(object):
             raise NotImplementedError
 
     @staticmethod
-    def preprocess_file(array):
+    def preprocess_mf(array):
         var = list(array.variables.keys())[-1]
-        array_new = array.rename({var: 'eff_lat'})
-        array_new = array_new.sortby('time')
+        if var not in ['eff_lat','t_prime']:
+            array = array.rename({var: 'eff_lat'})
+            var='eff_lat'
+        array_filter = array.where(array[var] != 0)
+        array_new = array.sortby('time')
         return array_new
 
     @staticmethod
@@ -96,7 +93,9 @@ class SingleModelPostProcessor(object):
         """
 
         if decade:
-            decade_day_idx = pd.MultiIndex.from_arrays([(data.time.dt.year//10)*10, data.time.dt.dayofyear])
+            decade_day_idx = pd.MultiIndex.from_arrays(
+                    [((data.time.dt.year//10)*10).data,
+                        data.time.dt.dayofyear.data])
             data.coords['decade_day'] = ('time', decade_day_idx)
             grp_by = 'decade_day'
         else:
@@ -108,13 +107,12 @@ class SingleModelPostProcessor(object):
                    )
 
         demeaned = data.groupby(grp_by) - xr_mean
+        return demeaned.drop('decade_day',errors='ignore')
 
-        return demeaned
-
-    def demeaned_shift(self, ds):
+    def demeaned_shift(self, data, decade=False):
         """ Shifted demeaned effective latitude 
 
-        This function takes the demeaned effective latitude data and adds back
+        This function takes the effective latitude data, demeans it, and adds back
         the real latitude to get an infomative measurement of effective
         latitude instead of an anomaly. 
 
@@ -123,8 +121,8 @@ class SingleModelPostProcessor(object):
             xr.Dataset
         """
 
-        demeaned_array = self.demean(ds)
-        demeaned_shift = demeaned_array + ds.lat
+        demeaned_array = self.demean(data, decade=decade)
+        demeaned_shift = demeaned_array + data.lat
 
         return demeaned_shift
 
@@ -186,7 +184,11 @@ class SingleModelPostProcessor(object):
              ax.gridlines()
          plt.savefig(path_to_save+'_skew.png')
 
-def run_demeaning(path_processed,shortname,path_postproc,var_of_interest):
+def run_demeaning(path_processed,
+        shortname,
+        path_postproc,
+        var_of_interest,
+        decade=False):
     #create class
     single = SingleModelPostProcessor(path_to_input_files=path_processed,
          diagnostic_var=var_of_interest,
@@ -194,12 +196,13 @@ def run_demeaning(path_processed,shortname,path_postproc,var_of_interest):
     #demean or shift
     if var_of_interest =='t_prime':
         filename=path_postproc+f'{shortname}_{var_of_interest}_demeaned.nc4'
-        single.demean(single.dataset.t_prime).rename('dm_t_prime'
+        single.demean(single.dataset.t_prime,
+                decade=decade).rename('dm_t_prime'
                                             ).to_netcdf(filename)
     elif var_of_interest == 'eff_lat':
         filename=path_postproc+f'{shortname}_{var_of_interest}_demeaned_shifted.nc4'
-        single.demeaned_shift(single.dataset).rename(
-            {var_of_interest: 'phi_eq_prime'
-            }).to_netcdf(filename)
+        single.demeaned_shift(single.dataset,
+                decade=decade).rename({var_of_interest: 'phi_eq_prime'}
+                        ).to_netcdf(filename)
     return single
 
