@@ -1,0 +1,48 @@
+Bootstrap: docker
+From: continuumio/miniconda3
+
+%environment
+   LANG=C.UTF-7
+   LC_ALL=C.UTF-8
+   ENV="notebook"
+   CONDA_PATH="/opt/conda/bin"
+   CONDA_ENV_PATH="/opt/conda/envs/${NOTEBOOK}/bin"
+   PATH="/opt/conda/envs/notebook/bin:${PATH}"
+
+   export LANG LC_ALL ENV CONDA_ENV_PATH CONDA_PATH PATH
+    
+%post
+   # Annoying conda management
+   # Singularity executes this inside a /sh session that needs 
+   # absolute paths, and does not evaluate the environment until
+   # is built. Hence, we need to set the PATH.
+
+   export PATH="/opt/conda/bin:${PATH}"
+   export PATH="/opt/conda/envs/pangeo/bin:${PATH}"
+   . /opt/conda/etc/profile.d/conda.sh
+
+   # Conda build environment 
+   conda update conda
+   conda create -n pangeo -c conda-forge \
+   python=3.8* pangeo-notebook dask-jobqueue mpi4py \
+   xarray zarr numcodecs hvplot geoviews datashader  \
+   nbserverproxy widgetsnbextension cartopy
+
+   # Enable extension
+   conda activate pangeo
+   jupyter labextension install @pyviz/jupyterlab_pyviz
+   jupyter labextension install @jupyter-widgets/jupyterlab-manager
+   jupyter labextension install dask-labextension
+   jupyter serverextension enable dask_labextension
+   
+   # Install integration additional requirements
+   conda install setuptools -c conda-forge
+   pip install --upgrade pip
+   pip install impactlab-tools fair Dickens \
+   parse joblib statsmodels tqdm seaborn cdsapi\
+   xshape 
+
+%labels
+    Author: Ivan Higuera-Mendieta
+    Version v0.0.1
+
