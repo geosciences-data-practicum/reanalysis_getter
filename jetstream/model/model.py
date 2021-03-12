@@ -68,7 +68,7 @@ class Model(Template):
         ]
 
         xr_data = array_obj.sel(time=valid_keys['time'])
-        xr_data = array_obj.drop(other_coords)
+        xr_data = xr_data.drop(other_coords)
 
         if 'lat' in valid_keys.keys():
             xr_data = xr_data.where(xr_data.lat > valid_keys['lat'], drop=True)

@@ -109,7 +109,7 @@ class Template(ABC):
 
         return xr_data
 
-    @property
+    @cachedproperty
     def data_array_dask_df(self):
         """ Return data array as dask DataFrame and calculate temperature bins. 
 
