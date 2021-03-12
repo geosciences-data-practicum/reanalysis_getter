@@ -49,7 +49,7 @@ script `launch-dask.sh` orchestrates the creration of the scheduler, and a
 user-defined number of workers: 
 
 ```bash
-./launh-dask.sh <path_to_climate_model> <path_to_save_folder> <number-of-workers>
+./launch-dask.sh <path_to_climate_model> <path_to_save_folder> <number-of-workers>
 ```
 
 This will spawn one job per worker, but additionally, a job that runs the
@@ -111,3 +111,70 @@ EXAMPLES:
    Activaate and run a Jupyter notebook in local note:
         $ ./load_stuff.sh -r
 ```
+
+## 3. Containarized environment
+Additionally, we also have a built a contained environment compatible with most
+HPC systems using Singularity. You can check more about how to use Singularity
+using [its quick start guide][5]. In a nutshell, our Singularity container is
+a Ubuntu OS with a Python (`miniconda3`) environment with all the needed
+dependencies installed. We provide options to open jupyter notebooks that are
+compatible with `Dask`. At the same time, you can build you own scripts and run
+them against the same environment. 
+
+**A note on singularity remote builts**: `singularity build` needs root access,
+which might be impossible to have if you live under the HPC admin tyranny. But, 
+Singularity have your back with the use of remote builds: `singularity build
+--remote`. This means that the building process happens remotely on [Sylabs][6]
+servers and gets automatically downloaded to the local machine. To make use of
+this option, you need to authenticate and open a Sylabs account, you can start
+this process by just doing: `singularity remote login`. A link will appear to
+create an account and an API key. Later, an prompt will appear asking for your
+API key, you just need to copy and paste it to your terminal.
+
+You can build the container using our `Makefile`: 
+
+```bash
+make container
+```
+
+After running this you will have a `/images` directory with the container file.
+This container will contain the same libraries that in the [pangeo environment][7] 
+but the current version of the `scc_multiverse` will not be installed. In this
+repo we added some tools to install the `scc_multiverse` and open a Jupyter
+notebook to explore data or run SCC calculations.
+`infrastructure/run_in_singularity.sh` is a script that installs this repo and
+opens a Jupyter notebooks inside the container:
+
+```bash
+age: ${0} {build|notebook}
+OPTIONS:
+   -h|help             Show this message
+   -b|--build
+   -n|--notebook
+INFRASTRUCTURE:
+   Build the infrastructure and output python
+   $ ./run_singularity.sh --build
+   Run notebook inside Singularity image. This function takes arguments
+   for both IP and port to use in Jupyterlab
+   $ ./run_singularity.sh --notebook 0.0.0.0 8888
+```
+
+We have wrapped this process within the same `Makefile` we use to build the
+Singularity container, so you can just do: 
+
+```bash
+make run-jupyter
+```
+
+The Jupyter `--port` option is hardcoded in the notebook, and the
+auto-ssh-fowarding is active by using the `--ip` flag. Be aware that you do not
+need to build the image on each run, the image will live in the `images/` folder
+and you can use the `run-jupyter` to run the Jupyter Notebook. Also, everytime
+you build the notebook, a fresh version of the code will be installed in the
+notebook (this might take a while due to compilation issues). 
+
+
+[5]: https://sylabs.io/guides/3.5/user-guide/quick_start.html
+[6]: https://sylabs.io/
+[7]: https://pangeo.io/setup_guides/hpc.html""
+
