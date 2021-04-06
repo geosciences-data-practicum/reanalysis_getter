@@ -11,7 +11,6 @@ from scipy import fft, fftpack
 from scipy.stats import skew
 from matplotlib.colors import LogNorm
 import joypy
-os.environ['PROJ_LIB'] = '/home/afarah/.conda/envs/jetstream/share/proj/'
 import cartopy.crs as ccrs
 from descriptors import cachedproperty
 from distributed.client import _get_global_client
