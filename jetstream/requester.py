@@ -103,9 +103,6 @@ def request_wrapper( path,
         c = cdsapi.Client()
         dict_params = build_request_dict(start_date = kwargs['start_date'],
                                          end_date = kwargs['end_date'],
-                                         months=kwargs['months'],
-                                         days=kwargs['days'],
-                                         years=kwargs['years'],
                                          variables_of_interest = kwargs['variables_of_interest'],
                                          subday_frequency = kwargs['subday_frequency'],
                                          pressure_levels = kwargs ['pressure_levels']
