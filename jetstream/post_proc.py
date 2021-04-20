@@ -93,6 +93,8 @@ class SingleModelPostProcessor(object):
         """
 
         if decade:
+            #data = data.assign_coords(year=('time',
+            #    group_into_winters(data.time)))
             decade_day_idx = pd.MultiIndex.from_arrays(
                     [((data.time.dt.year//10)*10).data,
                         data.time.dt.dayofyear.data])
@@ -127,13 +129,32 @@ class SingleModelPostProcessor(object):
         return demeaned_shift
 
     def stats_calc(self,data):
-        mean = data.mean(dim='time')#.rename({'t_prime':'tp_mean'})
-        std = data.std(dim='time')#.rename({'t_prime':'tp_std'})
-        skewness = xr.full_like(mean,
-                                skew(data[self.var],axis=0), #skew(self.dataset.t_prime,axis=0),
-                                dtype=np.float64)#.rename({'tp_mean':'tp_skew'})
-
-        return xr.concat([mean,std,skewness],dim='stat').assign_coords({'stat':['mean','std','skew']})
+        try:
+            data = data.drop('expver')
+        except ValueError:
+            pass
+        mean = data.mean(dim='time')[self.var]
+        std = data.std(dim='time')[self.var]
+        skewness = xr.DataArray(
+                data=skew(data[self.var], nan_policy='omit'),
+                dims=mean.dims,
+                coords=mean.coords
+                )
+        #statistics = xr.Dataset(dict(stats=(
+        #    ['stat','lat','lon'],[
+        #    mean,
+        #    std,
+        #    xr.ones_like(mean)*skewness
+        #    ])
+        #    ),
+        #    coords={'stat':['mean','std','skewness'],
+        #        'lat':mean.lat,'lon':mean.lon}
+        #    )
+        statistics=xr.concat(
+            [mean,std,skewness],#skewness*xr.ones_like(mean)],
+            dim='stat'
+            ).assign_coords({'stat':['mean','std','skew']})
+        return statistics
 
     def diagnostic_stats(self,demean=False):
         data=self.dataset
@@ -160,30 +181,51 @@ class SingleModelPostProcessor(object):
 
     def diagnostic_plot(self, demean=False, path_to_save="./"):
          self.diagnostic_stats(demean=demean)
-         xr_all = xr.concat([self.stats_present,self.stats_future,self.stats_diff],dim='period').assign_coords({'period':['present','future','diff']})
+         xr_all = xr.concat([
+             self.stats_present,
+             self.stats_future,
+             self.stats_diff],
+             dim='period').assign_coords({
+                 'period':['first_decade','last_decade','difference']
+                 })
+         xr_all.to_netcdf(path_to_save+'_statistics.nc4')
          print('plotting...')
-         p = xr_all.sel(stat='mean')[self.var].plot(transform = ccrs.PlateCarree(),
-                                    col='period',
-                                    subplot_kws={'projection': ccrs.Orthographic(20, 90)})
+         p = xr_all.sel(stat='mean').plot.imshow(
+                 transform=ccrs.PlateCarree(),
+                 col='period',
+                 subplot_kws={
+                     'projection':ccrs.Orthographic(20, 90)
+                     }
+                 )
          for ax in p.axes.flat:
              ax.coastlines()
              ax.gridlines()
          plt.savefig(path_to_save+'_mean.png')
-         p = xr_all.sel(stat='std')[self.var].plot(transform = ccrs.PlateCarree(),
-                                    col='period',
-                                    subplot_kws={'projection': ccrs.Orthographic(20, 90)})
+         p = xr_all.sel(stat='std').plot.imshow(
+                 transform = ccrs.PlateCarree(),
+                 col='period',
+                 subplot_kws={
+                     'projection': ccrs.Orthographic(20, 90)
+                     }
+                 )
          for ax in p.axes.flat:
              ax.coastlines()
              ax.gridlines()
          plt.savefig(path_to_save+'_std.png')
-         p = xr_all.sel(stat='skew')[self.var].plot(transform = ccrs.PlateCarree(),
-                                    col='period',
-                                    subplot_kws={'projection': ccrs.Orthographic(20, 90)})
+         p = xr_all.sel(stat='skew').plot.imshow(
+                 transform=ccrs.PlateCarree(),
+                 col='period',
+                 subplot_kws={
+                     'projection':ccrs.Orthographic(20, 90)
+                     }
+                 )
          for ax in p.axes.flat:
              ax.coastlines()
              ax.gridlines()
          plt.savefig(path_to_save+'_skew.png')
 
+
+#---- helper functions ----#
 def run_demeaning(path_processed,
         shortname,
         path_postproc,
@@ -206,3 +248,13 @@ def run_demeaning(path_processed,
                         ).to_netcdf(filename)
     return single
 
+def group_into_winters(dates):
+    year_arr = np.zeros(len(dates),dtype=int)
+    y=0
+    for date in dates:
+        if date.dt.month <= 3:
+            year_arr[y] = date.dt.year - 1
+        else:
+            year_arr[y] = date.dt.year
+        y+=1
+    return year_arr
