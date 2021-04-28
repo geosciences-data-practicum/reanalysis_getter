@@ -112,11 +112,11 @@ class SingleModelPostProcessor(object):
         return demeaned.drop('decade_day',errors='ignore')
 
     def demeaned_shift(self, data, decade=False):
-        """ Shifted demeaned effective latitude 
+        """ Shifted demeaned effective latitude
 
         This function takes the effective latitude data, demeans it, and adds back
         the real latitude to get an infomative measurement of effective
-        latitude instead of an anomaly. 
+        latitude instead of an anomaly.
 
         Returns
         -------

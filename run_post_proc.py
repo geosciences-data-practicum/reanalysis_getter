@@ -3,7 +3,7 @@ import os
 from dask.distributed import Client, LocalCluster
 
 data_product = 'climate_model'
-var_of_interest = 't_prime'
+var_of_interest = 'eff_lat'#'t_prime'
 
 if data_product == 'reanalysis':
     list_of_models = ["ds_1979_2021_lat_20_1D_renamed",
@@ -38,12 +38,12 @@ for model in list_of_models:
         shortname = model.split('-')[0]
 
     print('creating class for ', shortname)
-    #single = run_demeaning(path_processed,
-    #                       shortname,
-    #                       path_postproc,
-    #                       var_of_interest,
-    #                       decade=True
-    #                       )
+    single = run_demeaning(path_processed,
+                           shortname,
+                           path_postproc,
+                           var_of_interest,
+                           decade=True
+                           )
     single = SingleModelPostProcessor(
             path_to_input_files=path_processed,
             diagnostic_var=var_of_interest,
