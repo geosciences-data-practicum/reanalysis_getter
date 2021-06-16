@@ -2,8 +2,8 @@ from jetstream.post_proc import run_demeaning, SingleModelPostProcessor
 import os
 from dask.distributed import Client, LocalCluster
 
-data_product = 'climate_model'
-var_of_interest = 'eff_lat'#'t_prime'
+data_product = 'climate_model' # 'reanalysis'
+var_of_interest = 'tas' #'eff_lat' #'t_prime' #'t_ref'
 
 if data_product == 'reanalysis':
     list_of_models = ["ds_1979_2021_lat_20_1D_renamed",
@@ -30,24 +30,28 @@ for model in list_of_models:
             'post_processing_output']:
         continue
 
+    if var_of_interest in ['t_ref', 'tas']:
+        label='t_prime'
+    else:
+        label=var_of_interest
     if data_product == 'reanalysis':
-        path_processed = f'{path_data}{model}/{model}_{var_of_interest}*.nc4'
+        path_processed = f'{path_data}{model}/{model}_{label}*.nc4'
         shortname = 'era5'+model[2:12]
     elif data_product == 'climate_model':
-        path_processed = f'{path_data}{model}/{model}_{var_of_interest}*11*.nc4'
+        path_processed = f'{path_data}{model}/{model}_{label}*11*.nc4'
         shortname = model.split('-')[0]
 
     print('creating class for ', shortname)
-    single = run_demeaning(path_processed,
-                           shortname,
-                           path_postproc,
-                           var_of_interest,
-                           decade=True
-                           )
+#    single = run_demeaning(path_processed,
+#                           shortname,
+#                           path_postproc,
+#                           var_of_interest,
+#                           decade=True
+#                           )
     single = SingleModelPostProcessor(
             path_to_input_files=path_processed,
             diagnostic_var=var_of_interest,
             season='DJF'
             )
-    single.diagnostic_plot(demean=False,
-            path_to_save=f'{path_postproc}/diagnostic_plots/{shortname}_{var_of_interest}')
+    single.diagnostic_plot(demean=True,
+            path_to_save=f'{path_postproc}/diagnostic_plots/{shortname}_{var_of_interest}_demean')

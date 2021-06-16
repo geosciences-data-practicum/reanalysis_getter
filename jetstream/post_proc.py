@@ -67,11 +67,11 @@ class SingleModelPostProcessor(object):
     @staticmethod
     def preprocess_mf(array):
         var = list(array.variables.keys())[-1]
-        if var not in ['eff_lat','t_prime']:
+        if var not in ['eff_lat','t_prime','t_ref', 'tas']:
             array = array.rename({var: 'eff_lat'})
             var='eff_lat'
         array_filter = array.where(array[var] != 0)
-        array_new = array.sortby('time')
+        array_new = array_filter.sortby('time')
         return array_new
 
     @staticmethod
