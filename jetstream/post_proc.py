@@ -31,7 +31,8 @@ class SingleModelPostProcessor(object):
         self.season = season
         self.var = diagnostic_var
 
-    def sel_winters(self,data,start_year=2015,end_year=2100):
+    @staticmethod
+    def sel_winters(data,start_year=2015,end_year=2100):
         winters = pd.date_range('%i-12-01'%start_year,'%i-02-28'%(start_year+1),freq='D')
         for i in range(start_year+1,end_year):
             begin = i
@@ -236,16 +237,14 @@ def run_demeaning(path_processed,
          diagnostic_var=var_of_interest,
          season='DJF')
     #demean or shift
-    if var_of_interest =='t_prime':
-        filename=path_postproc+f'{shortname}_{var_of_interest}_demeaned.nc4'
-        single.demean(single.dataset.t_prime,
-                decade=decade).rename('dm_t_prime'
-                                            ).to_netcdf(filename)
-    elif var_of_interest == 'eff_lat':
-        filename=path_postproc+f'{shortname}_{var_of_interest}_demeaned_shifted.nc4'
-        single.demeaned_shift(single.dataset,
-                decade=decade).rename({var_of_interest: 'phi_eq_prime'}
-                        ).to_netcdf(filename)
+    filename=path_postproc+f'{shortname}_{var_of_interest}_demeaned.nc4'
+    single.demean(single.dataset[var_of_interest],decade=decade
+            ).rename(f'dm_{var_of_interest}').to_netcdf(filename)
+    #elif var_of_interest == 'eff_lat':
+    #    filename=path_postproc+f'{shortname}_{var_of_interest}_demeaned_shifted.nc4'
+    #    single.demeaned_shift(single.dataset,
+    #            decade=decade).rename({var_of_interest: 'phi_eq_prime'}
+    #                    ).to_netcdf(filename)
     return single
 
 def group_into_winters(dates):
