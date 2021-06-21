@@ -12,7 +12,6 @@ from descriptors import cachedproperty
 from distributed.client import _get_global_client
 from abc import ABC, abstractmethod
 
-
 class Template(ABC):
     """ Abstract class to process and calculate metrics in climate data products
 
@@ -73,7 +72,7 @@ class Template(ABC):
         self.t_prime_calculation.to_netcdf(os.path.join(dir_save, filename_tref))
         self.effective_latitude_xr.to_netcdf(os.path.join(dir_save,filename_eff_lat))
 
-    @cachedproperty
+    @property
     def data_array(self) -> xr.Dataset:
         """ Lazy load model/analysis data into memory and subsetting raw data
         using `self.subset_dict`
@@ -86,7 +85,7 @@ class Template(ABC):
         """
 
         xr_data = xr.open_mfdataset(self.path_to_files,
-                                    chunks=self.chunks,
+                                   chunks=self.chunks,
                                     parallel=True)
 
         if not all(x in list(xr_data.coords) for x in self.DIMS):
@@ -109,16 +108,16 @@ class Template(ABC):
 
         return xr_data
 
-    @cachedproperty
+    @property
     def data_array_dask_df(self):
-        """ Return data array as dask DataFrame and calculate temperature bins. 
+        """ Return data array as dask DataFrame and calculate temperature bins.
 
         Thins property will yield a dask.dataframe that contain the
         `self.data_array` data with the temperature bining and latitudinal grid
         areas per each row. The bining can be either daily, by default, or use
         a window set by `self.moving_window_size`. This process is right now
         not very optimized, so it might take a while to process in large
-        datasets. 
+        datasets.
 
         Returns:
             dask.datarame.DaskDataFrame
@@ -158,24 +157,28 @@ class Template(ABC):
                     label_time=label)
                 window_arrays.append(bucket_array)
 
-            lazy_results = dask.compute(*window_arrays)
+            lazy_results = dask.compute(*window_arrays[self.moving_window_size:])
             lazy_results_no_none = [r for r in lazy_results if r is not None]
 
             self.data_array['temp_bucket'] = xr.concat(lazy_results_no_none,
                                                        dim='time')
 
             #return unified chunks since window changed chunks
-            return self.data_array.\
-                unify_chunks().\
-                to_dask_dataframe(dim_order=self.DIMS)
+            return (
+                self.data_array
+                .unify_chunks()
+                .to_dask_dataframe(dim_order=self.DIMS)
+            )
 
         else:
             # Yield dask.dataframe and process groupby operation
             array_ddf = self.data_array.to_dask_dataframe(dim_order=self.DIMS)
-            array_ddf_transform = array_ddf.\
-                groupby(['time']).\
-                apply(self._bucket_builder_ddf,
-                      meta=meta)
+            array_ddf_transform = (
+                array_ddf
+                .groupby(['time'])
+                .apply(self._bucket_builder_ddf,
+                       meta=meta)
+            )
 
             return array_ddf_transform
 
@@ -200,6 +203,16 @@ class Template(ABC):
         if len(lat_diff) != 1:
             lat_diff = np.mean(lat_diff)
 
+        return np.abs(lat_diff)
+
+    @cachedproperty
+    def lon_grid_size(self):
+        """ Calculate grid size from model/analysis
+        """
+        lon_diff = np.unique(np.diff(self.data_array.lon))
+
+        if len(lon_diff) != 1:
+            lon_diff = np.mean(lon_diff)
         return np.abs(lat_diff)
 
     @cachedproperty
@@ -272,7 +285,7 @@ class Template(ABC):
             'time': ddf.time,
             'lat': ddf.lat,
             'lon': ddf.lon,
-            't2m': ddf.t2m,
+            self.temp_var: ddf[self.temp_var],
             'area_grid': ddf.area_grid,
             'temp_bucket': bins_left(bin_array)
         })
@@ -289,15 +302,15 @@ class Template(ABC):
           to calculate buckets
         - label_time (pd.Timedelta or pd.datetime): A timestamp to identify the
           start of the window. Usually, the `xr.DataArray.rolling` includes
-          labels per each start of the window if `center=False`. 
+          labels per each start of the window if `center=False`.
 
         Returns:
             dask.future
         '''
 
         # calculate min and max for the aray_window
-        max_temp = w_arr.max().values
-        min_temp = w_arr.min().values
+        max_temp = np.ceil(w_arr.max().values)
+        min_temp = np.floor(w_arr.min().values)
         label_str = pd.to_datetime(label_time.values).strftime('%Y-%m-%d')
 
         if not any(np.isnan([max_temp, min_temp])):
@@ -309,13 +322,12 @@ class Template(ABC):
             buckets = np.digitize(w_arr.sel(time=label_str),
                                   bins=bins)
             buckets_w_labels = np.vectorize(bins_left_labels.get)(buckets)
-            buckets_arr = xr.DataArray(buckets_w_labels,
+            buckets_arr = xr.DataArray(buckets_w_labels.squeeze(),
                                        coords=[
                                            ('lat', w_arr.lat),
                                            ('lon', w_arr.lon)
-                                       ])
+                                       ]).astype(np.float64)
             buckets_arr = buckets_arr.assign_coords({'time': label_time})
-
         else:
             buckets_arr = None
 
@@ -333,54 +345,70 @@ class Template(ABC):
         Returns: xr.DataArray with cumulative area maps per time.
         """
 
-        dd_data_group = self.data_array_dask_df.\
-            reset_index(drop=True).\
-            groupby(['temp_bucket', 'time']).\
-            area_grid.\
-            sum().\
-            compute()
+        dd_data_group = (
+            self.data_array_dask_df
+            .reset_index(drop=True)
+            .groupby(['temp_bucket', 'time'])
+            .area_grid
+            .sum()
+        ).compute()
 
         # Cumumlative sum
-        dd_data_group_time = dd_data_group.\
-            sort_index().\
-            groupby(level=[1]).\
-            cumsum().\
-            reset_index()
+        dd_data_group_time = (
+            dd_data_group
+            .sort_index()
+            .groupby(level=[1])
+            .cumsum()
+            .reset_index()
+        )
 
         # Calculate effective latitudes by using the temperature area weights
-        dd_data_group_time['cdf_eff_lat_deg'] = dd_data_group_time.\
-            groupby('time').\
-            area_grid.\
-            apply(self._distributions_lat_eff)
+        dd_data_group_time['cdf_eff_lat_deg'] = (
+            dd_data_group_time
+            .groupby('time')
+            .area_grid
+            .apply(self._distributions_lat_eff)
+        )
 
-        dd_group_time_array = dd_data_group_time.set_index(['time', 'temp_bucket']).to_xarray()
+        dd_group_time_array = (
+            dd_data_group_time
+            .set_index(['time', 'temp_bucket'])
+            .to_xarray()
+        )
         dd_group_time_array_delayed = dd_group_time_array.chunk(self.chunks)
 
         return  dd_group_time_array_delayed
 
-    @property
+    @cachedproperty
     def effective_latitude_xr(self):
-        """ DataArray with effective latitude 
+        """ DataArray with effective latitude
         """
 
-        grid_areas_ddf = self.grid_area_xr.to_dataframe().\
-            reset_index()
+        grid_areas_ddf = self.grid_area_xr.to_dataframe().reset_index()
+        grid_areas_ddf = grid_areas_ddf[
+            ['temp_bucket', 'cdf_eff_lat_deg', 'time']
+        ]
 
-        merge_ddf = self.data_array_dask_df.\
-            reset_index(drop=True).\
-            merge(grid_areas_ddf,
-                  on=['time', 'temp_bucket'],
-                  how='left')
+        merge_ddf = (
+            self.data_array_dask_df
+            .reset_index(drop=True)
+            #.repartition(npartitions=100)
+            .merge(grid_areas_ddf,
+                   on=['time', 'temp_bucket'],
+                   how='left')
+        )
 
         eff_lat_xr = self.dask_data_to_xarray(merge_ddf,
                                               var='cdf_eff_lat_deg')
+
+        eff_lat_xr.name = 'effective_latitude'
 
         return eff_lat_xr
 
     def vectorized_temp_ref(self, cdf_eff_lat, latitudes, temp_bin_edges):
         """
         Latitudinal reference temperature to capture the gradient effect of the
-        jet-stream (t_ref) 
+        jet-stream (t_ref)
 
         Using the cumulative effective latitude map, temp_ref is the interpolation
         of the effective latitudes given a temperature bucket. An interpolation is
@@ -389,11 +417,11 @@ class Template(ABC):
        Parameters:
            - cdf_lat_effs (np.nd-array)
            - temp_binedges (str): column name with the temperature bin. We use
-           'temp_brackets'. 
+           'temp_brackets'.
            - pdf_lat_effs (str): column name with the name of the cumulative
-           effective latitudes. 
+           effective latitudes.
 
-        Returns: An ndarray with the interpolated values. 
+        Returns: An ndarray with the interpolated values.
         """
 
         xp = cdf_eff_lat[ ~ np.isnan(cdf_eff_lat)]
@@ -407,7 +435,6 @@ class Template(ABC):
     @cachedproperty
     def t_prime_calculation(self):
         """ Jet-stream metric
-
         return: A delayed dask.DataFrame with the t-prime, t-ref. 
         """
 

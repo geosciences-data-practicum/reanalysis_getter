@@ -8,7 +8,6 @@ from jetstream.model.template import Template
 class Model(Template):
     """ Methods template for GCM
     """
-
     temp_var = 'tas'
 
     @cachedproperty
@@ -28,7 +27,7 @@ class Model(Template):
                 'longitude': 'lon',
             })
 
-        if isinstance(xr_data.time.values[0], cftime._cftime.DatetimeNoLeap):
+        if isinstance(xr_data.time.values[0], cftime._cftime.datetime):
             datetime_index = xr_data.indexes['time'].to_datetimeindex()
             xr_data['time'] = datetime_index
 
