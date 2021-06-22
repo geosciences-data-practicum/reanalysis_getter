@@ -233,6 +233,24 @@ class SingleModelPostProcessor(object):
              ax.gridlines()
          plt.savefig(path_to_save+'_skew.png')
 
+    def get_gradient(self, decade_mean=False):
+        assert 't_ref' in self.dataset.keys(), "t_ref must be in dataset"
+        tref = self.dataset.t_ref.sel(lon=5,method='nearest')
+        top_lat, bottom_lat = (85,25)
+        rise = top_lat - bottom_lat
+        run = tref.sel(lat=top_lat, method='nearest') - tref.sel(lat=bottom_lat,method='nearest')
+        slope = rise/run
+
+        if decade_mean:
+            # resample so that all seasons are grouped together instead of by year
+            # this way we don't get one december in one decade and its corresponding jan+feb in another
+            ds_res = slope.resample(time='Q-FEB', label='left', loffset='1D').mean()
+            ds_res.coords['decade'] = ((ds_res.time.dt.year//10)*10)
+            slope = ds_res.groupby('decade').mean('time')
+
+    return slope
+
+
 
 #---- helper functions ----#
 def run_demeaning(path_processed,
