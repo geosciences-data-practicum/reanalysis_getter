@@ -38,7 +38,15 @@ class SingleModelPostProcessor(object):
             begin = i
             end = i+1
             winters=winters.union(pd.date_range('%i-12-01'%begin,'%i-02-28'%end,freq='D'))
-        selected = data.sel(time=winters)
+        try:
+            selected = data.sel(time=winters)
+        except KeyError: # if my last year doesn't have JF
+            winters = winters.drop(pd.date_range('%i-01-01'%end_year,
+                                                 '%i-02-28'%end_year,
+                                                 freq='D'
+                                                )
+                                  )
+            selected = data.sel(time=winters)
         return selected
 
     @cachedproperty
