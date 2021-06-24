@@ -15,7 +15,6 @@ class Model(Template):
         """ Lazy load model/analysis data into memory. 
         """
 
-        client = _get_global_client()
 
         xr_data = xr.open_mfdataset(self.path_to_files,
                                     chunks=self.chunks,
@@ -33,6 +32,9 @@ class Model(Template):
 
         if self.subset_dict is not None:
             xr_data = self.cut(xr_data)
+            # Remove repeated dates in concatenation. Pick first element
+            xr_data = xr_data.sel(time = ~ xr_data.get_index('time').duplicated())
+
             print('Cut data')
 
         if self.season is not None:

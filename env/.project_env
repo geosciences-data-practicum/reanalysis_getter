@@ -1,5 +1,5 @@
-ENV_NAME='reanalysis_env'
-DATA_FOLDER='/project2/geos65390'
+ENV_NAME='reanalysis_env_legacy'
+DATA_FOLDER='/project2/pi-moyer'
 PORT=2500
 ROOT_FOLDER=$(pwd)
 

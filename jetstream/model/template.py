@@ -47,6 +47,8 @@ class Template(ABC):
 
         if isinstance(self.path_to_files, pathlib.Path):
             self.product = self.path_to_files.stem
+        elif all([isinstance(p, pathlib.Path) for p in self.path_to_files]):
+            self.product = self.path_to_files[0].stem
         else:
             self.product = pathlib.Path(self.path_to_files).stem
 
