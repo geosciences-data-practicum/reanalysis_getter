@@ -30,13 +30,22 @@ class SingleModelPostProcessor(object):
         self.season = season
         self.var = diagnostic_var
 
-    def sel_winters(self,data,start_year=2015,end_year=2100):
+    @staticmethod
+    def sel_winters(data,start_year=2015,end_year=2100):
         winters = pd.date_range('%i-12-01'%start_year,'%i-02-28'%(start_year+1),freq='D')
         for i in range(start_year+1,end_year):
             begin = i
             end = i+1
             winters=winters.union(pd.date_range('%i-12-01'%begin,'%i-02-28'%end,freq='D'))
-        selected = data.sel(time=winters)
+        try:
+            selected = data.sel(time=winters)
+        except KeyError: # if my last year doesn't have JF
+            winters = winters.drop(pd.date_range('%i-01-01'%end_year,
+                                                 '%i-02-28'%end_year,
+                                                 freq='D'
+                                                )
+                                  )
+            selected = data.sel(time=winters)
         return selected
 
     @cachedproperty
@@ -66,11 +75,11 @@ class SingleModelPostProcessor(object):
     @staticmethod
     def preprocess_mf(array):
         var = list(array.variables.keys())[-1]
-        if var not in ['eff_lat','t_prime']:
+        if var not in ['eff_lat','t_prime','t_ref', 'tas']:
             array = array.rename({var: 'eff_lat'})
             var='eff_lat'
         array_filter = array.where(array[var] != 0)
-        array_new = array.sortby('time')
+        array_new = array_filter.sortby('time')
         return array_new
 
     @staticmethod
@@ -92,6 +101,8 @@ class SingleModelPostProcessor(object):
         """
 
         if decade:
+            #data = data.assign_coords(year=('time',
+            #    group_into_winters(data.time)))
             decade_day_idx = pd.MultiIndex.from_arrays(
                     [((data.time.dt.year//10)*10).data,
                         data.time.dt.dayofyear.data])
@@ -109,11 +120,11 @@ class SingleModelPostProcessor(object):
         return demeaned.drop('decade_day',errors='ignore')
 
     def demeaned_shift(self, data, decade=False):
-        """ Shifted demeaned effective latitude 
+        """ Shifted demeaned effective latitude
 
         This function takes the effective latitude data, demeans it, and adds back
         the real latitude to get an infomative measurement of effective
-        latitude instead of an anomaly. 
+        latitude instead of an anomaly.
 
         Returns
         -------
@@ -126,13 +137,32 @@ class SingleModelPostProcessor(object):
         return demeaned_shift
 
     def stats_calc(self,data):
-        mean = data.mean(dim='time')#.rename({'t_prime':'tp_mean'})
-        std = data.std(dim='time')#.rename({'t_prime':'tp_std'})
-        skewness = xr.full_like(mean,
-                                skew(data[self.var],axis=0), #skew(self.dataset.t_prime,axis=0),
-                                dtype=np.float64)#.rename({'tp_mean':'tp_skew'})
-
-        return xr.concat([mean,std,skewness],dim='stat').assign_coords({'stat':['mean','std','skew']})
+        try:
+            data = data.drop('expver')
+        except ValueError:
+            pass
+        mean = data.mean(dim='time')[self.var]
+        std = data.std(dim='time')[self.var]
+        skewness = xr.DataArray(
+                data=skew(data[self.var], nan_policy='omit'),
+                dims=mean.dims,
+                coords=mean.coords
+                )
+        #statistics = xr.Dataset(dict(stats=(
+        #    ['stat','lat','lon'],[
+        #    mean,
+        #    std,
+        #    xr.ones_like(mean)*skewness
+        #    ])
+        #    ),
+        #    coords={'stat':['mean','std','skewness'],
+        #        'lat':mean.lat,'lon':mean.lon}
+        #    )
+        statistics=xr.concat(
+            [mean,std,skewness],#skewness*xr.ones_like(mean)],
+            dim='stat'
+            ).assign_coords({'stat':['mean','std','skew']})
+        return statistics
 
     def diagnostic_stats(self,demean=False):
         data=self.dataset
@@ -159,30 +189,51 @@ class SingleModelPostProcessor(object):
 
     def diagnostic_plot(self, demean=False, path_to_save="./"):
          self.diagnostic_stats(demean=demean)
-         xr_all = xr.concat([self.stats_present,self.stats_future,self.stats_diff],dim='period').assign_coords({'period':['present','future','diff']})
+         xr_all = xr.concat([
+             self.stats_present,
+             self.stats_future,
+             self.stats_diff],
+             dim='period').assign_coords({
+                 'period':['first_decade','last_decade','difference']
+                 })
+         xr_all.to_netcdf(path_to_save+'_statistics.nc4')
          print('plotting...')
-         p = xr_all.sel(stat='mean')[self.var].plot(transform = ccrs.PlateCarree(),
-                                    col='period',
-                                    subplot_kws={'projection': ccrs.Orthographic(20, 90)})
+         p = xr_all.sel(stat='mean').plot.imshow(
+                 transform=ccrs.PlateCarree(),
+                 col='period',
+                 subplot_kws={
+                     'projection':ccrs.Orthographic(20, 90)
+                     }
+                 )
          for ax in p.axes.flat:
              ax.coastlines()
              ax.gridlines()
          plt.savefig(path_to_save+'_mean.png')
-         p = xr_all.sel(stat='std')[self.var].plot(transform = ccrs.PlateCarree(),
-                                    col='period',
-                                    subplot_kws={'projection': ccrs.Orthographic(20, 90)})
+         p = xr_all.sel(stat='std').plot.imshow(
+                 transform = ccrs.PlateCarree(),
+                 col='period',
+                 subplot_kws={
+                     'projection': ccrs.Orthographic(20, 90)
+                     }
+                 )
          for ax in p.axes.flat:
              ax.coastlines()
              ax.gridlines()
          plt.savefig(path_to_save+'_std.png')
-         p = xr_all.sel(stat='skew')[self.var].plot(transform = ccrs.PlateCarree(),
-                                    col='period',
-                                    subplot_kws={'projection': ccrs.Orthographic(20, 90)})
+         p = xr_all.sel(stat='skew').plot.imshow(
+                 transform=ccrs.PlateCarree(),
+                 col='period',
+                 subplot_kws={
+                     'projection':ccrs.Orthographic(20, 90)
+                     }
+                 )
          for ax in p.axes.flat:
              ax.coastlines()
              ax.gridlines()
          plt.savefig(path_to_save+'_skew.png')
 
+
+#---- helper functions ----#
 def run_demeaning(path_processed,
         shortname,
         path_postproc,
@@ -193,15 +244,23 @@ def run_demeaning(path_processed,
          diagnostic_var=var_of_interest,
          season='DJF')
     #demean or shift
-    if var_of_interest =='t_prime':
-        filename=path_postproc+f'{shortname}_{var_of_interest}_demeaned.nc4'
-        single.demean(single.dataset.t_prime,
-                decade=decade).rename('dm_t_prime'
-                                            ).to_netcdf(filename)
-    elif var_of_interest == 'eff_lat':
-        filename=path_postproc+f'{shortname}_{var_of_interest}_demeaned_shifted.nc4'
-        single.demeaned_shift(single.dataset,
-                decade=decade).rename({var_of_interest: 'phi_eq_prime'}
-                        ).to_netcdf(filename)
+    filename=path_postproc+f'{shortname}_{var_of_interest}_demeaned.nc4'
+    single.demean(single.dataset[var_of_interest],decade=decade
+            ).rename(f'dm_{var_of_interest}').to_netcdf(filename)
+    #elif var_of_interest == 'eff_lat':
+    #    filename=path_postproc+f'{shortname}_{var_of_interest}_demeaned_shifted.nc4'
+    #    single.demeaned_shift(single.dataset,
+    #            decade=decade).rename({var_of_interest: 'phi_eq_prime'}
+    #                    ).to_netcdf(filename)
     return single
 
+def group_into_winters(dates):
+    year_arr = np.zeros(len(dates),dtype=int)
+    y=0
+    for date in dates:
+        if date.dt.month <= 3:
+            year_arr[y] = date.dt.year - 1
+        else:
+            year_arr[y] = date.dt.year
+        y+=1
+    return year_arr
